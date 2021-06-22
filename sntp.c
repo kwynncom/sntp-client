@@ -62,14 +62,10 @@ void sntp_doit(const int n, char *addr) {
             }
 
 	int wrl = 0;
-	int ig  = 0;
-    int len = 0;
 	for(i=0; i < n; i++) { 
-		len = sizeof(packs + i);
 		wrl = fwrite(&packs[i], SNTP_PLEN, 1, stdout);
-		// fwrite(locs + i * 2	   , sizeof(unsigned long), 1, stdout);
-		// fwrite(locs + i * 2 + 1, sizeof(unsigned long), 1, stdout);
-		ig = 2;
+		fwrite(&locs[i * 2]	  , sizeof(unsigned long), 1, stdout);
+		fwrite(&locs[i * 2 + 1], sizeof(unsigned long), 1, stdout);
 		continue;
 	}
 
