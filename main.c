@@ -13,8 +13,8 @@ void main(int argc, char **argv) {
 	unsigned long b, e;
 	int sock = getOutboundUDPSock(getAddr(argc, argv), 123);
 
-    memcpy(pack    , "#", 1 ); // see PHP version; ord('#') == 0x23	
-	bzero (pack + 1, 47     );
+    memcpy(pack    , "#",  1); // SNTP packet header - see readme
+	bzero (pack + 1,      47);
 	
 	b = nanotime();
 	if (write(sock, pack, snpl) != snpl) perror("bad write");

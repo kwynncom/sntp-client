@@ -23,12 +23,30 @@ EXPECTED OUTPUT
 3. server time upon send
 4. client time upon receipt
 
-
 Note that I'm writing this with the number_format().  The ',' will probably go away.
+
+Running the binary directly results in gibberish / binary characters.
 
 TECH NOTES
 
+Note that I am not populating the SNTP packet with client time--neither send nor receive.  I am tracking it separately.  The servers work just 
+fine without it, it's more trouble than it's worth to populate, and as long as I'm tracking it somewhere I don't need it in the packet.
+
 The ::FFFF: prefix allows the IP4 address to work in IP6.
+48 is an SNTP packet length
+The "#" sent to the server is interpreted as binary.  It's 0x23.  It defines SNTP v4 (VN) and defines the packet as coming from a client (Mode).
+See https://datatracker.ietf.org/doc/html/rfc4330#page-8
+
+The packet header is
+LI   - 2 bit leap second indicator; always 0 from client
+VN   - 3 bit SNTP version number; 4 is current
+Mode - 3 bit packet type where 3 = client
+
+So that's 8 bits.  We want
+
+LI VN  Mode
+00100011 === 0x23 === ASCII '#' https://www.asciitable.com/
+
 
 
 NTP SERVERS
