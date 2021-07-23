@@ -2,44 +2,60 @@
 
 require_once('/opt/kwynn/kwutils.php');
 
-doit();
-
-function doit() {
-$itlen = 64; //  + 8 + 8;
-
-$r = popen('./a.out', 'rb');
-$wr = fread($r, $itlen); kwas(strlen($wr) === $itlen, "sntp wrap fread not $itlen bytes");
-pclose($r); unset($r);
-
-decodeSNTPP($wr, 48, 'Q');
-decodeSNTPP($wr, 32, 'N2');
-decodeSNTPP($wr, 40, 'N2');
-decodeSNTPP($wr, 56, 'Q');
-
-exit(0);
-}
-
-function decodeSNTPP($p, $off, $unf) {
+class sntpWrapper {
 	
-	static $UminusNTP = 2208988800;
-	static $full32    = 4294967295;
-	
-	$lp = substr($p, $off, 8);
-	$upn = unpack($unf, $lp);
+	const bin	    = './sntp';
+	const expectLen = 64;
 
-	$un1 = $upn[1];
-	
-	if ($unf === 'N2') {
-		$su   = $un1 - $UminusNTP;
-		$fr = $upn[2] / $full32;
-		$ns = $su * M_BILLION + intval(round($fr * M_BILLION));
-		$ec = $ns;
-	} else if ($unf === 'Q') {
-		$ec = $upn[1];
+	function __construct() {
+		$dat = $this->get();
+		$ns = $this->parse($dat); unset($dat);
+		$this->out($ns); unset($ns);
+		
 	}
 	
-	$nf = number_format($ec);
-	echo($nf);
-	echo("\n");
+	private function out($ns) {
+		foreach($ns as $ec) {
+			$nf = number_format($ec);
+			echo($nf);
+			echo("\n");		
+		}
+	}
+	
+	private function get() {
+		$r = popen(self::bin, 'rb');
+		$wr = fread($r, self::expectLen); kwas(strlen($wr) === self::expectLen, 'sntp wrap fread not ' . self::expectLen . 'bytes');
+		pclose($r); unset($r);
+		return $wr;
+	}
+	
+	private function parse($wr) {
+		$ns[] = self::decodeSNTPP($wr, 48, 'Q');
+		$ns[] = self::decodeSNTPP($wr, 32, 'N2');
+		$ns[] = self::decodeSNTPP($wr, 40, 'N2');
+		$ns[] = self::decodeSNTPP($wr, 56, 'Q');
+		return $ns;
+	}
 
-}
+	private static function decodeSNTPP($p, $off, $unf) {
+
+		static $UminusNTP = 2208988800;
+		static $full32    = 4294967295;
+
+		$lp = substr($p, $off, 8);
+		$upn = unpack($unf, $lp);
+
+		$un1 = $upn[1];
+
+		if ($unf === 'N2') {
+			$su   = $un1 - $UminusNTP;
+			$fr = $upn[2] / $full32;
+			$ns = $su * M_BILLION + intval(round($fr * M_BILLION));
+			$ec = $ns;
+		} else if ($unf === 'Q') $ec = $upn[1];
+		
+		return $ec;
+	}
+} // class
+
+new sntpWrapper();

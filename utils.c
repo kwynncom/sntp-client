@@ -1,9 +1,45 @@
+#include <time.h>   // timespec struct
+#include <stdlib.h> // exit()
 #include <stdio.h> // perror
 #include <sys/socket.h> 
 #include <arpa/inet.h> 
-#include <stdlib.h> // exit
 #include <string.h> // strcmp
 #include <strings.h> // bzero
+
+#include "config.h"
+
+char *getAddr(int argc, char **argv) {
+
+	if (argc < 2) return KW_DEFAULT_NTP_SERVER_IP6;
+
+	char *arg;
+	int argl;
+
+	arg  = argv[1];
+	argl = strlen(arg);
+
+	
+	if (argl < 7 || argl > 39) // "1.2.3.4" is 7 chars; IPv6 max 39 chars
+		{ fprintf(stderr, "bad IP length of %d\n", argl); exit(EXIT_FAILURE);}
+
+	if (strstr(arg, ".") == NULL) return arg;
+
+	if (argl > 15) { fprintf(stderr, "bad IPv4 address - too long\n"); exit(EXIT_FAILURE);}
+
+	const char *ip46p = "::FFFF:";
+	const int bsz = strlen(ip46p) + 15 + 1;
+	char *sbuf = (char *)malloc(bsz);
+	sbuf = strcat(sbuf, ip46p);
+	sbuf = strcat(sbuf, arg);
+
+	return sbuf;
+}
+
+unsigned long nanotime() {
+    struct timespec sts;
+    if (clock_gettime(CLOCK_REALTIME, &sts) != 0) exit(8131);
+    return sts.tv_sec * 1000000000 + sts.tv_nsec;
+}
 
 int getOutboundUDPSock(char *addrStr, int port) {
 

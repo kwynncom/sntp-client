@@ -1,8 +1,8 @@
-sntp : main.c time.c socket.c
-	gcc -O3 main.c socket.c time.c -o sntp
+sntp : main.c utils.c
+	gcc -O3 main.c utils.c -o sntp
 
-debug : main.c time.c socket.c
-	gcc -g main.c socket.c time.c -o debug
+debug : main.c utils.c
+	gcc -g main.c utils.c -o debug
 
 clean : 
 	rm sntp
