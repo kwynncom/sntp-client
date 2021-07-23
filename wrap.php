@@ -2,6 +2,8 @@
 
 require_once('/opt/kwynn/kwutils.php');
 
+new sntpWrapper();
+
 class sntpWrapper {
 	
 	const bin	    = './sntp';
@@ -11,19 +13,27 @@ class sntpWrapper {
 		$dat = $this->get();
 		$ns = $this->parse($dat); unset($dat);
 		$this->out($ns); unset($ns);
-		
 	}
 	
 	private function out($ns) {
-		foreach($ns as $ec) {
-			$nf = number_format($ec);
+		foreach($ns as $n) {
+			$nf = number_format($n);
 			echo($nf);
 			echo("\n");		
 		}
 	}
 	
+	private static function getArgs() {
+		global $argc;
+		global $argv;
+		
+		if ($argc < 2) return '';
+		return $argv[1];
+	}
+	
 	private function get() {
-		$r = popen(self::bin, 'rb');
+		$a = self::getArgs();
+		$r = popen(self::bin . ' ' . $a, 'rb'); unset($a);
 		$wr = fread($r, self::expectLen); kwas(strlen($wr) === self::expectLen, 'sntp wrap fread not ' . self::expectLen . 'bytes');
 		pclose($r); unset($r);
 		return $wr;
@@ -51,11 +61,9 @@ class sntpWrapper {
 			$su   = $un1 - $UminusNTP;
 			$fr = $upn[2] / $full32;
 			$ns = $su * M_BILLION + intval(round($fr * M_BILLION));
-			$ec = $ns;
-		} else if ($unf === 'Q') $ec = $upn[1];
+			$ret = $ns;
+		} else if ($unf === 'Q') $ret = $upn[1];
 		
-		return $ec;
+		return $ret;
 	}
 } // class
-
-new sntpWrapper();
