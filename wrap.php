@@ -7,7 +7,7 @@ doit();
 function doit() {
 $itlen = 64; //  + 8 + 8;
 
-$r = popen('./sntp', 'rb');
+$r = popen('./a.out', 'rb');
 $wr = fread($r, $itlen); kwas(strlen($wr) === $itlen, "sntp wrap fread not $itlen bytes");
 pclose($r); unset($r);
 
