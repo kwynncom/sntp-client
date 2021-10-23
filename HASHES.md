@@ -1,0 +1,5 @@
+x86_64 binary record
+
+Sat Oct 23 12:38:25 AM EDT 2021
+gcc -O3 main.c utils.c -o sntp
+SHA512(sntp)= a191737fc443c5da78eab04b2fd3fadd84cd1eb7e689e812b93aacc92b68ff1379f589775cc8b5513ee9850ac08367b6800b475454b00c3a144224532f152234

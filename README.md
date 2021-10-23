@@ -4,6 +4,8 @@ SNTP (network time) client
 
 REQUIREMENTS - gcc, php
  
+Read the "raw" version of this file, or download; newlines don't work on web.
+
 BASIC USAGE
 
 make

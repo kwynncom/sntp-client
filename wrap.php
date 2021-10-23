@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 
 require_once('/opt/kwynn/kwutils.php');
@@ -6,7 +7,7 @@ new sntpWrapper();
 
 class sntpWrapper {
 	
-	const bin	    = './sntp';
+	const bin	    = __DIR__ . '/' . 'sntp';
 	const expectLen = 64;
 
 	function __construct() {
@@ -16,11 +17,7 @@ class sntpWrapper {
 	}
 	
 	private function out($ns) {
-		foreach($ns as $n) {
-			$nf = number_format($n);
-			echo($nf);
-			echo("\n");		
-		}
+		echo(json_encode($ns) . "\n");
 	}
 	
 	private static function getArgs() {

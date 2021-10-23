@@ -6,11 +6,9 @@
 #include <string.h> // strcmp
 #include <strings.h> // bzero
 
-#include "config.h"
-
 char *getAddr(int argc, char **argv) {
 
-	if (argc < 2) return KW_DEFAULT_NTP_SERVER_IP6;
+	if (argc < 2) { fprintf(stderr, "ERROR: expecting IP address as first param\n"); exit(1237); }
 
 	char *arg;
 	int argl;
