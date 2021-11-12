@@ -29,6 +29,24 @@ Note that I'm writing this with the number_format().  The ',' will probably go a
 
 Running the binary directly results in gibberish / binary characters.
 
+INSTALLATION
+
+make
+# shows: gcc -O3 main.c utils.c -o sntp
+sudo mv sntp /usr/bin
+which sntp
+# shows /usr/bin/sntp
+sntp 2600:1f18:23ab:9500:acc1:69c5:2674:8c03 | base64
+# shows: JAQA5wAAABoAAAAcqf6pe+U4jlKMOsvqAAAAAAAAAADlOI7LlDRhQ+U4jsuUONbAGrRnUDG6tha+KJZSMbq2Fg==
+# You won't get the same number, but something that size
+chmod 755 wrap.php
+sudo cp wrap.php /usr/bin
+which wrap.php
+/usr/bin/wrap.php
+wrap.php 2600:1f18:23ab:9500:acc1:69c5:2674:8c03
+[1636700403851593379,1636700403869174941,1636700403869264357,1636700403887496709]
+# again, you'll get later numbers
+
 TECH NOTES
 
 Note that I am not populating the SNTP packet with client time--neither send nor receive.  I am tracking it separately.  The servers work just 
