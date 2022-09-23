@@ -19,12 +19,9 @@ void call10(const int *socks) {
     
     setOBPack(pack);
 
-    for (; i < 20; i++) {
-        ckq();
-        const int ignore = 1;
-    }
-    // call20(socks[i++ % IPN], &bsts, &ests, pack);
-    // call30(       bsts,  ests, pack);
+    ckq();
+    call20(socks[i++ % IPN], &bsts, &ests, pack);
+    call30(       bsts,  ests, pack);
 }
 
 void call20(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
