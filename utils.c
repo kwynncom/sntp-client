@@ -4,6 +4,9 @@
 #include <arpa/inet.h> 
 #include <string.h> // strcmp
 #include <strings.h> // bzero
+#include <time.h>   // timespec struct
+
+#include "utils.h"
 
 void setOBPack(char *pack) {
     memcpy(pack    , "#",  1); // SNTP packet header - see readme
@@ -54,22 +57,27 @@ int getOutboundUDPSock(char *addrStr, int port) {
     return sock;
 }
 
-void popIPs(const char *a) {
-    
+void popIPs(char **a);
+
+void popSocks(int *socks) {
+    char *ips[IPN];
+    popIPs(ips);
+    int i;
+    for (i=0; i < IPN; i++) socks[i] = getOutboundUDPSock(getAddr(ips[i]), 123);
 }
 
-// const char * 
+void popIPs(char **a) {
+    a[0] = "129.6.15.28";
+    a[1] = "129.6.15.29";
+    a[2] = "129.6.15.30";
+    a[3] = "129.6.15.27";
+    a[4] = "2610:20:6f15:15::27";
+    a[5] = "129.6.15.26";
+    a[6] = "2610:20:6f15:15::26";
+}
 
-/* const char *a[2];
-a[0] = "blah";
-a[1] = "hmm"; */
-
-/* 
-129.6.15.28 
-129.6.15.29 
-129.6.15.30 
-129.6.15.27 
-2610:20:6f15:15::27 
-129.6.15.26 
-2610:20:6f15:15::26 
-*/ 
+double Ufl() {
+    struct timespec sts;
+    if (clock_gettime(CLOCK_REALTIME, &sts) != 0) exit(8131);
+    return (double) sts.tv_sec + ((double)sts.tv_nsec / (double)M_BILLION);
+}

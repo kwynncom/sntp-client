@@ -1,12 +1,13 @@
 #include <unistd.h> // read, write, close
 #include "utils.h"
 
-void call10(int sock);
+void call10(const int *socks);
 
 void main(void) {
 
-    const char *ips[IPN];
-    const int sock = getOutboundUDPSock(getAddr("129.6.15.28"), 123);
-    call10(sock);
-    close(sock);
+    int socks[IPN];
+    popSocks(socks);
+    call10(socks);
+
+    for (int i=0; i < IPN; i++) close(socks[i]);
 }
