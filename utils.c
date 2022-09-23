@@ -87,21 +87,31 @@ void decodeSNTPP(const unsigned char *p /*, unsigned long *sr, unsigned long *ss
 
     const unsigned int UminusNTP = 2208988800;
     const unsigned int full32    = 4294967295;
-    unsigned int ntps = 0;
     int i = 0;
+    int j = 0;
+    unsigned int ntps = 0;
+    unsigned int U;
+    unsigned int fri;
+    double fr;
+    unsigned long Uns;
 
-    for (i=0; i < 4; i++) ntps = ntps | (p[i+32] << (8 * (3 - i)));
-    
-    const unsigned int U    = ntps - UminusNTP;
-    
-    unsigned int fri = 0;
-    for (i=0; i < 4; i++) fri = fri | (p[i+36] << (8 * (3 - i)));    
+    for (j = 0; j < 2; j++) {
+        
+        U = 0;
+        fri = 0;
 
-    const double  fr = (double)fri / (double)full32;
+        for (i=0; i < 4; i++) ntps = ntps | (p[i+32 + j * 8] << (8 * (3 - i)));
 
-    const unsigned long Uns = (unsigned long)U * M_BILLION + (unsigned long)round(fr * M_BILLION);
+        U    = ntps - UminusNTP;
 
-    const int ignore = 1;
+        for (i=0; i < 4; i++) fri = fri | (p[i+36 + j * 8] << (8 * (3 - i)));    
+
+        fr = (double)fri / (double)full32;
+
+        Uns = (unsigned long)U * M_BILLION + (unsigned long)round(fr * M_BILLION);
+
+        const int ignore = 1;
+    }
     
 /*
     
