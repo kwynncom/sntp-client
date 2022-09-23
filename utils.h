@@ -4,3 +4,4 @@ int getOutboundUDPSock(char *addrStr, int port);
 void setOBPack(char *pack);
 #define IPN 6
 #define M_BILLION 1000000000
+#define SNPL 48 // SNTP packet length
