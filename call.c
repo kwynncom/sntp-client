@@ -13,7 +13,7 @@ void call10(const int *socks) {
 
     unsigned long i = 0;
 
-    char pack[SNPL];
+    unsigned char pack[SNPL];
     struct timespec bsts;
     struct timespec ests;
     
@@ -23,7 +23,7 @@ void call10(const int *socks) {
     call20(socks[i++ % IPN], &bsts, &ests, pack);
     call30(       bsts,  ests, pack);
 }
-
+void decodeSNTPP(const char *p /*, unsigned long *sr, unsigned long *ss*/);
 void call20(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
 
     ssize_t ignoreForWarn;
@@ -32,6 +32,8 @@ void call20(const int sock, struct timespec *bs, struct timespec *es, char *pack
     if (write(sock, pack, SNPL) != SNPL) perror("bad write");
     if (read (sock, pack, SNPL) != SNPL) perror("bad read");
     clock_gettime(CLOCK_REALTIME, es);
+    decodeSNTPP(pack);
+
 }
 
 void call30(const struct timespec bs, const struct timespec es, const char *pack) {

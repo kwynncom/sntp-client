@@ -81,3 +81,30 @@ long double Ufl() {
     if (clock_gettime(CLOCK_REALTIME, &sts) != 0) exit(8131);
     return (double) sts.tv_sec + ((double)sts.tv_nsec / (double)M_BILLION);
 }
+
+void decodeSNTPP(const unsigned char *p /*, unsigned long *sr, unsigned long *ss*/) {
+
+    const unsigned int UminusNTP = 2208988800;
+    const unsigned int full32    = 4294967295;
+    unsigned int ntps = 0;
+    int i = 0;
+
+    for (i=0; i < 4; i++) {
+        ntps = ntps | (p[i+32] << (8 * (3 - i)));
+     }
+    
+    const unsigned int U    = ntps - UminusNTP;
+    const int ignore = 1;
+    
+/*
+    
+    $lp = substr($p, $off, 8); // 32 (serv receive) and 40 (serv send) are the 2 relvant packets
+    $upn = unpack($unf, $lp);
+
+    $su   = $un1 - $UminusNTP;
+    $fr = $upn[2] / $full32;
+    $ns = $su * M_BILLION + intval(round($fr * M_BILLION));
+    $ret = $ns;
+
+    return $ret; */
+}
