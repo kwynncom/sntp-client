@@ -1,0 +1,22 @@
+apt-cache search libb64
+libb64-0d - base64 encoding/decoding library - runtime library
+libb64-dev - base64 encoding/decoding library - development files
+
+apt-cache policy libb64-0d
+libb64-0d:
+  Installed: (none)
+  Candidate: 1.2-5
+
+https://github.com/BuLogics/libb64/blob/master/examples/c-example1.c
+
+https://libb64.sourceforge.net/ - less useful, off hand
+
+https://gist.github.com/alan-mushi/19546a0e2c6bd4e059fd  - JSON
+
+apt-cache policy libjson-c5
+libjson-c5:
+  Installed: 0.15-3~ubuntu1.22.04.1
+  Candidate: 0.15-3~ubuntu1.22.04.1
+
+https://github.com/jehiah/json-c
+
