@@ -5,6 +5,7 @@
 #include <string.h> // strcmp
 #include <strings.h> // bzero
 #include <time.h>   // timespec struct
+#include <math.h>
 
 #include "utils.h"
 
@@ -89,11 +90,17 @@ void decodeSNTPP(const unsigned char *p /*, unsigned long *sr, unsigned long *ss
     unsigned int ntps = 0;
     int i = 0;
 
-    for (i=0; i < 4; i++) {
-        ntps = ntps | (p[i+32] << (8 * (3 - i)));
-     }
+    for (i=0; i < 4; i++) ntps = ntps | (p[i+32] << (8 * (3 - i)));
     
     const unsigned int U    = ntps - UminusNTP;
+    
+    unsigned int fri = 0;
+    for (i=0; i < 4; i++) fri = fri | (p[i+36] << (8 * (3 - i)));    
+
+    const double  fr = (double)fri / (double)full32;
+
+    const unsigned long Uns = (unsigned long)U * M_BILLION + (unsigned long)round(fr * M_BILLION);
+
     const int ignore = 1;
     
 /*
