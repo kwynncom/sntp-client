@@ -76,7 +76,7 @@ void popIPs(char **a) {
     a[6] = "2610:20:6f15:15::26";
 }
 
-double Ufl() {
+long double Ufl() {
     struct timespec sts;
     if (clock_gettime(CLOCK_REALTIME, &sts) != 0) exit(8131);
     return (double) sts.tv_sec + ((double)sts.tv_nsec / (double)M_BILLION);

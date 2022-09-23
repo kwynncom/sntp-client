@@ -1,14 +1,13 @@
 #include <unistd.h> // read, write, close
 #include <stdio.h>  // stdout, fflush
 #include <time.h>   // timespec struct
-#include <stdbool.h>
 
 #include "utils.h"
 
 void call20(int sock, struct timespec *bs, struct timespec *es, char *pack);
 void call30(const struct timespec bs, const struct timespec es, const char *pack);
 
-bool isq(void);
+void ckq(void);
 
 void call10(const int *socks) {
 
@@ -20,14 +19,12 @@ void call10(const int *socks) {
     
     setOBPack(pack);
 
-    if (isq()) {
-        printf("quota OK\n");
-        // call20(socks[i++ % IPN], &bsts, &ests, pack);
-        // call30(       bsts,  ests, pack);
-    } else {
-        perror("quota fail!\n");
-        return;
+    for (; i < 20; i++) {
+        ckq();
+        const int ignore = 1;
     }
+    // call20(socks[i++ % IPN], &bsts, &ests, pack);
+    // call30(       bsts,  ests, pack);
 }
 
 void call20(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
