@@ -3,7 +3,6 @@
 #include <time.h>   // timespec struct
 #include <stdlib.h>
 #include <stdbool.h>
-#include <sys/file.h>
 
 #include "utils.h"
 
@@ -57,13 +56,9 @@ void output(const struct timespec bs, const struct timespec es, const char *pack
     decodeSNTPP(pack, &bsl, &esl);
 
     printf (      fmt, b, bsl, esl, e, ip);
-    // fflush(stdout);
 
     FILE   *outf = fopen("/var/kwynn/mysd/get", "w");
-    if (flock(fileno(outf), LOCK_EX) != 0) { perror("fifo output lock failure\n"); exit(28); }
     fprintf(outf, fmt, b, bsl, esl, e, ip);
-    // fflush(outf);
-    flock(fileno(outf), LOCK_UN);
     fclose(outf);
 
 }
