@@ -3,13 +3,14 @@
 #include <time.h>   // timespec struct
 #include <stdlib.h>
 #include <stdbool.h>
+#include <sys/file.h>
 
 #include "utils.h"
 
-void call20(int sock, struct timespec *bs, struct timespec *es, char *pack);
-void call30(const struct timespec bs, const struct timespec es, const char *pack, const char *ip);
+void callServer(int sock, struct timespec *bs, struct timespec *es, char *pack);
+void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip);
 
-void ckq(void);
+bool ckq(void);
 bool onin(void);
 
 void call10(struct sockip *socks) {
@@ -23,16 +24,19 @@ void call10(struct sockip *socks) {
     int randi;
     
     while (true) {
-        setOBPack(pack);
-        randi = rand() % IPN;
         if (!onin()) return;
-        ckq();
-        call20(socks[randi].sock, &bsts, &ests, pack);
-        call30(       bsts,  ests, pack, socks[randi].ip);
+        if (ckq()) {
+            setOBPack(pack);
+            randi = rand() % IPN;
+            ckq();
+            callServer(socks[randi].sock, &bsts, &ests, pack);
+        }
+
+        output(       bsts,  ests, pack, socks[randi].ip);
     }
 }
 void decodeSNTPP(const char *p, unsigned long *sr, unsigned long *ss);
-void call20(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
+void callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
 
     ssize_t ignoreForWarn;
 
@@ -42,7 +46,9 @@ void call20(const int sock, struct timespec *bs, struct timespec *es, char *pack
     clock_gettime(CLOCK_REALTIME, es);
 }
 
-void call30(const struct timespec bs, const struct timespec es, const char *pack, const char *ip) {
+void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip) {
+
+    static char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\n";
     
     const unsigned long b = bs.tv_sec * M_BILLION + bs.tv_nsec;
     const unsigned long e = es.tv_sec * M_BILLION + es.tv_nsec;  
@@ -50,7 +56,14 @@ void call30(const struct timespec bs, const struct timespec es, const char *pack
     
     decodeSNTPP(pack, &bsl, &esl);
 
-    printf("%lu\n%lu\n%lu\n%lu\n%s\n", b, bsl, esl, e, ip);
-    
-    // fflush(stdout); 
+    printf (      fmt, b, bsl, esl, e, ip);
+    // fflush(stdout);
+
+    FILE   *outf = fopen("/var/kwynn/mysd/get", "w");
+    if (flock(fileno(outf), LOCK_EX) != 0) { perror("fifo output lock failure\n"); exit(28); }
+    fprintf(outf, fmt, b, bsl, esl, e, ip);
+    // fflush(outf);
+    flock(fileno(outf), LOCK_UN);
+    fclose(outf);
+
 }
