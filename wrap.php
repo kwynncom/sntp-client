@@ -8,13 +8,11 @@ new sntpWrapper();
 class sntpWrapper {
 	
 const bin	    = __DIR__ . '/' . 'sntp';
-const expectLen = 64;
 const maxS = 1;
 const NISTMaxS = 4;
 
 function __construct() {
-    $dat = $this->get();
-    $ns = $this->parse($dat); unset($dat);
+    $ns = $this->get();
     $this->sanityCheck($ns);
     $this->out($ns); 
     $this->sleep($ns[0]);
@@ -44,47 +42,21 @@ private function sanityCheck($a) {
     return;
 }
 
-private static function getArgs() {
-    global $argc;
-    global $argv;
-
-    if ($argc < 2) return '';
-    return $argv[1];
-}
 
 private function get() {
-    $a = self::getArgs();
-    $r = popen(self::bin . ' ' . $a, 'rb'); unset($a);
-    $wr = fread($r, self::expectLen); kwas(strlen($wr) === self::expectLen, 'sntp wrap fread not ' . self::expectLen . 'bytes');
-    pclose($r); unset($r);
-    return $wr;
+    $r = shell_exec(self::bin);
+    echo($r);
+    $a = explode("\n", $r);
+    $a20 = array_slice($a, 0, 4);
+    $a30 = [];
+    foreach($a20 as $v) $a30[] = intval($v);
+    return $a30;
+    
+    
+
 }
 
-private function parse($wr) {
-    $ns[] = self::decodeSNTPP($wr, 48, 'Q');
-    $ns[] = self::decodeSNTPP($wr, 32, 'N2');
-    $ns[] = self::decodeSNTPP($wr, 40, 'N2');
-    $ns[] = self::decodeSNTPP($wr, 56, 'Q');
-    return $ns;
-}
 
-private static function decodeSNTPP($p, $off, $unf) {
 
-    static $UminusNTP = 2208988800;
-    static $full32    = 4294967295;
 
-    $lp = substr($p, $off, 8);
-    $upn = unpack($unf, $lp);
-
-    $un1 = $upn[1];
-
-    if ($unf === 'N2') {
-            $su   = $un1 - $UminusNTP;
-            $fr = $upn[2] / $full32;
-            $ns = $su * M_BILLION + intval(round($fr * M_BILLION));
-            $ret = $ns;
-    } else if ($unf === 'Q') $ret = $upn[1];
-
-    return $ret;
-}
 } // class

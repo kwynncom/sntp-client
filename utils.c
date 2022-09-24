@@ -60,11 +60,14 @@ int getOutboundUDPSock(char *addrStr, int port) {
 
 void popIPs(char **a);
 
-void popSocks(int *socks) {
+void popSocks(struct sockip *socks) {
     char *ips[IPN];
     popIPs(ips);
     int i;
-    for (i=0; i < IPN; i++) socks[i] = getOutboundUDPSock(getAddr(ips[i]), 123);
+    for (i=0; i < IPN; i++) {
+        strcpy(socks[i].ip, ips[i]);
+        socks[i].sock = getOutboundUDPSock(getAddr(ips[i]), 123);
+    }
 }
 
 void popIPs(char **a) {
@@ -83,10 +86,10 @@ long double Ufl() {
     return (double) sts.tv_sec + ((double)sts.tv_nsec / (double)M_BILLION);
 }
 
-void decodeSNTPP(const unsigned char *p /*, unsigned long *sr, unsigned long *ss*/) {
+void decodeSNTPP(const unsigned char *p, unsigned long *sr, unsigned long *ss) {
 
     const unsigned int UminusNTP = 2208988800;
-    const unsigned int full32    = 4294967295;
+    const unsigned int full32    = 4294967295; 
     int i = 0;
     int j = 0;
     unsigned int ntps = 0;
@@ -110,18 +113,9 @@ void decodeSNTPP(const unsigned char *p /*, unsigned long *sr, unsigned long *ss
 
         Uns = (unsigned long)U * M_BILLION + (unsigned long)round(fr * M_BILLION);
 
+        if (j == 0) *sr = Uns;
+        else        *ss = Uns;
+        
         const int ignore = 1;
-    }
-    
-/*
-    
-    $lp = substr($p, $off, 8); // 32 (serv receive) and 40 (serv send) are the 2 relvant packets
-    $upn = unpack($unf, $lp);
-
-    $su   = $un1 - $UminusNTP;
-    $fr = $upn[2] / $full32;
-    $ns = $su * M_BILLION + intval(round($fr * M_BILLION));
-    $ret = $ns;
-
-    return $ret; */
-}
+    } // loop
+} // func

@@ -6,6 +6,14 @@ void setOBPack(char *pack);
 #define M_BILLION 1000000000
 #define M_MILLION 1000000
 #define SNPL 48 // SNTP packet length
-void popSocks(int *socks);
 long double Ufl();
 #define NISTMaxS 4.0
+#define MaxIPL 40
+
+struct sockip {
+    char ip[MaxIPL];
+    int  sock;
+};
+
+
+void popSocks(struct sockip *socks);
