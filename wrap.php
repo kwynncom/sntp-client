@@ -14,7 +14,6 @@ const NISTMaxS = 4;
 function __construct() {
     $ns = $this->get();
     $this->sanityCheck($ns);
-    $this->out($ns); 
     $this->sleep($ns[0]);
 }
 
@@ -25,11 +24,6 @@ private function sleep($b) {
     $sus = roint($ss * M_MILLION);
     usleep($sus); 
 }
-
-private function out($ns) {
-    echo(json_encode($ns) . "\n");
-}
-
 private function sanityCheck($a) {
     $min = min($a);
     $max = max($a);

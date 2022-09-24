@@ -1,8 +1,8 @@
-sntp :              main.c utils.c call.c quota.c
-	gcc  -O3 main.c utils.c call.c quota.c -o sntp -lm
+sntp :              main.c utils.c call.c quota.c onin.c
+	gcc  -O3    main.c utils.c call.c quota.c onin.c -o sntp -lm
 
-debug :            main.c utils.c call.c quota.c
-	gcc -g main.c utils.c call.c quota.c -o debug -lm
+debug :        main.c utils.c call.c quota.c onin.c
+	gcc -g main.c utils.c call.c quota.c onin.c -o debug -lm
 
 clean : 
 	rm sntp debug

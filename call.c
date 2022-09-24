@@ -2,6 +2,7 @@
 #include <stdio.h>  // stdout, fflush
 #include <time.h>   // timespec struct
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "utils.h"
 
@@ -9,6 +10,7 @@ void call20(int sock, struct timespec *bs, struct timespec *es, char *pack);
 void call30(const struct timespec bs, const struct timespec es, const char *pack, const char *ip);
 
 void ckq(void);
+bool onin(void);
 
 void call10(struct sockip *socks) {
 
@@ -18,13 +20,16 @@ void call10(struct sockip *socks) {
     struct timespec bsts;
     struct timespec ests;
     srand(time(NULL));
-    int randi = rand() % IPN;
+    int randi;
     
-    setOBPack(pack);
-
-    ckq();
-    call20(socks[randi].sock, &bsts, &ests, pack);
-    call30(       bsts,  ests, pack, socks[randi].ip);
+    while (true) {
+        setOBPack(pack);
+        randi = rand() % IPN;
+        if (!onin()) return;
+        ckq();
+        call20(socks[randi].sock, &bsts, &ests, pack);
+        call30(       bsts,  ests, pack, socks[randi].ip);
+    }
 }
 void decodeSNTPP(const char *p, unsigned long *sr, unsigned long *ss);
 void call20(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
