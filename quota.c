@@ -9,15 +9,16 @@ void ckq() {
     const long double now = Ufl();
     const long double d =  now - prev;
     const long double max = NISTMaxS;
-    prev = now;
     const long double togo = max - d;
+    prev = now;
     if (togo <= 0) return;
     const long usec = (long)roundl(togo * M_MILLION);
     if (usleep(usec) != 0) { 
         perror("usleep fail!\n");
         exit(345);
     }
-
+    
+    prev = Ufl();
     const int ignore = 1;
 }
 
