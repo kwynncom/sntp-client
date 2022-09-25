@@ -10,10 +10,10 @@
 void callServer(int sock, struct timespec *bs, struct timespec *es, char *pack);
 void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, bool isd, bool usefo);
 
-bool ckq(void);
+bool qckf(void);
 bool onin(void);
 
-void call10(struct sockip *socks, bool isd, bool usefo) {
+void call10(struct sockip *socks, bool isd, bool usefo, bool qckb) {
 
     unsigned char pack[SNPL], packCache[SNPL];
     struct timespec bsts;
@@ -27,9 +27,8 @@ void call10(struct sockip *socks, bool isd, bool usefo) {
         randi = rand() % IPN;
 
         if (isd && !onin()) return;
-        if (ckq()) {
-            ckq();
-			randiCache = randi;
+        if (!qckb || qckf()) {
+ 			randiCache = randi;
             callServer(socks[randiCache].sock, &bsts, &ests, pack);
 			didSend = true;
         } else didSend = false;

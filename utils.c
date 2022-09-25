@@ -43,15 +43,16 @@ FILE *getLockedFile() {
     return lockf;
 }
 
-void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep) {
+void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, bool *qck) {
 	*isd = *usefo = false;
-	*dosleep = true;
+	*dosleep = *qck = true;
 	if (argc < 2) return;
 	int i;
 	for (i=1; i < argc; i++) {
 		if (strcmp("-d"		 , argv[i]) == 0) *isd		= true;
 		if (strcmp("-fifoout", argv[i]) == 0) *usefo    = true;
 		if (strcmp("-nosleep", argv[i]) == 0) *dosleep  = false;
+		if (strcmp("-noqck"  , argv[i]) == 0) *qck      = false;
 	}
 }
 
@@ -169,7 +170,7 @@ bool onin() {
     return true; 
 } // func
 
-bool ckq() {
+bool qckf() {
     static long double prev = 0;
     const long double now = Ufl();
     const long double d =  now - prev;
