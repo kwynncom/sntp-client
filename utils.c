@@ -6,8 +6,25 @@
 #include <strings.h> // bzero
 #include <time.h>   // timespec struct
 #include <math.h>
+#include <stdbool.h>
+#include <sys/file.h>
 
 #include "utils.h"
+
+FILE *getLockedFile() {
+    FILE   *lockf = fopen(KWSNTPDLOCKFILE, "w");
+    if (flock(fileno(lockf), LOCK_EX | LOCK_NB) != 0) { perror("fifo output lock failure - another process running\n"); exit(28); }
+    return lockf;
+}
+
+void procArgs(int argc, char *argv[], bool *isd, bool *usefo) {
+	*isd = *usefo = false;
+	if (argc < 2) return;
+	int i;
+	for (i=1; i < argc; i++) if (strcmp("-d"	  , argv[i]) == 0) *isd   = true;
+	for (i=1; i < argc; i++) if (strcmp("-fifoout", argv[i]) == 0) *usefo = true;
+}
+
 
 void setOBPack(char *pack) {
     memcpy(pack    , "#",  1); // SNTP packet header - see readme
@@ -81,7 +98,7 @@ void popIPs(char **a) {
         a[6] = "2610:20:6f15:15::26";
     } else {
         int i;
-        for (i = 0; i < IPN; i++) a[i] = "34.193.238.16";
+        for (i = 0; i < IPN; i++) a[i] = TESTIP;
     }
 }
 
@@ -124,3 +141,25 @@ void decodeSNTPP(const unsigned char *p, unsigned long *sr, unsigned long *ss) {
         const int ignore = 1;
     } // loop
 } // func
+
+bool onin() {
+    FILE *fp = fopen(KWSNTPDPOKE, "r");
+    char c;
+    c = fgetc(fp);
+    fclose(fp);
+    if (c == 'x') return false;
+    return true; 
+} // func
+
+bool ckq() {
+    static long double prev = 0;
+    const long double now = Ufl();
+    const long double d =  now - prev;
+    const long double max = NISTMaxS;
+    const long double togo = max - d;
+    if (togo <= 0) {
+        prev = now;
+        return true;
+    }
+    return false;
+}

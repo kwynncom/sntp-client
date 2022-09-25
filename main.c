@@ -2,18 +2,20 @@
 #include <sys/file.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "utils.h"
 
-void call10(struct sockip *socks);
+void call10(struct sockip *socks, bool isd, bool usefo);
 
-void main(void) {
+void main(int argc, char *argv[]) {
 
-    FILE   *lockf = fopen("/tmp/kwsdl", "w");
-    if (flock(fileno(lockf), LOCK_EX | LOCK_NB) != 0) { perror("fifo output lock failure\n"); exit(28); }
-    struct sockip socks[IPN];
+    FILE   *lockf = getLockedFile();
+	struct sockip socks[IPN];
     popSocks(socks);
 
-    call10(socks);
+	bool isd, usefo;
+	procArgs(argc, argv, &isd, &usefo);
+    call10(socks, isd, usefo);
 
     flock(fileno(lockf), LOCK_UN);
     fclose(lockf);

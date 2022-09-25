@@ -8,14 +8,12 @@
 #include "utils.h"
 
 void callServer(int sock, struct timespec *bs, struct timespec *es, char *pack);
-void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip);
+void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, bool isd, bool usefo);
 
 bool ckq(void);
 bool onin(void);
 
-void call10(struct sockip *socks) {
-
-    unsigned long i = 0;
+void call10(struct sockip *socks, bool isd, bool usefo) {
 
     unsigned char pack[SNPL], packCache[SNPL];
     struct timespec bsts;
@@ -28,7 +26,7 @@ void call10(struct sockip *socks) {
         setOBPack(pack);
         randi = rand() % IPN;
 
-        if (!onin()) return;
+        if (isd && !onin()) return;
         if (ckq()) {
             ckq();
 			randiCache = randi;
@@ -36,10 +34,10 @@ void call10(struct sockip *socks) {
 			didSend = true;
         } else didSend = false;
 
-        output(       bsts,  ests, didSend ? pack : packCache, socks[randiCache].ip);
+        output(       bsts,  ests, didSend ? pack : packCache, socks[randiCache].ip, isd, usefo);
         if (didSend) memcpy(packCache, pack, SNPL);
 		 
-    } while (true);
+    } while (isd);
 }
 void decodeSNTPP(const char *p, unsigned long *sr, unsigned long *ss);
 void callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
@@ -49,7 +47,7 @@ void callServer(const int sock, struct timespec *bs, struct timespec *es, char *
     clock_gettime(CLOCK_REALTIME, es);
 }
 
-void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip) {
+void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, bool isd, bool usefo) {
 
     static char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\n";
     
@@ -61,8 +59,10 @@ void output(const struct timespec bs, const struct timespec es, const char *pack
 
     printf (      fmt, b, bsl, esl, e, ip);
 
-    FILE   *outf = fopen("/var/kwynn/mysd/get", "w");
-    fprintf(outf, fmt, b, bsl, esl, e, ip);
-    fclose(outf);
+	if (isd && usefo) {
+		FILE   *outf = fopen(KWSNTPDEXTGET, "w");
+		fprintf(outf, fmt, b, bsl, esl, e, ip);
+		fclose(outf);
+	}
 
 }
