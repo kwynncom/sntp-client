@@ -26,3 +26,7 @@ void popSocks(struct sockip *socks);
 void procArgs(int argc, char *argv[], bool *isd, bool *usefo);
 
 FILE *getLockedFile();
+
+void cleanup();
+
+void mysleep();

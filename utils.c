@@ -8,8 +8,35 @@
 #include <math.h>
 #include <stdbool.h>
 #include <sys/file.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "utils.h"
+
+void mysleep() {
+	int sl = (int)round(NISTMaxS);
+	printf("Sleeping for %d seconds.  Zzzzz....\n", sl);
+	sleep(sl);
+}
+
+void cleanup(struct sockip *socks, FILE *lockf) {
+	for (int i=0; i < IPN; i++) close(socks[i].sock);
+    flock(fileno(lockf), LOCK_UN);
+    fclose(lockf);
+}
+
+void popIPs(char **a);
+
+void popSocks(struct sockip *socks) {
+    char *ips[IPN];
+    popIPs(ips);
+    int i;
+    for (i=0; i < IPN; i++) {
+        strcpy(socks[i].ip, ips[i]);
+        socks[i].sock = getOutboundUDPSock(getAddr(ips[i]), 123);
+    }
+}
+
 
 FILE *getLockedFile() {
     FILE   *lockf = fopen(KWSNTPDLOCKFILE, "w");
@@ -73,18 +100,6 @@ int getOutboundUDPSock(char *addrStr, int port) {
     if (connect(sock, (struct sockaddr *) &addro, sizeof(addro)) != 0) {  printf("connection with the server failed...\n"); exit(EXIT_FAILURE); } 
         
     return sock;
-}
-
-void popIPs(char **a);
-
-void popSocks(struct sockip *socks) {
-    char *ips[IPN];
-    popIPs(ips);
-    int i;
-    for (i=0; i < IPN; i++) {
-        strcpy(socks[i].ip, ips[i]);
-        socks[i].sock = getOutboundUDPSock(getAddr(ips[i]), 123);
-    }
 }
 
 void popIPs(char **a) {

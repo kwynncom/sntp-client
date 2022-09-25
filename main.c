@@ -17,7 +17,7 @@ void main(int argc, char *argv[]) {
 	procArgs(argc, argv, &isd, &usefo);
     call10(socks, isd, usefo);
 
-    flock(fileno(lockf), LOCK_UN);
-    fclose(lockf);
-    for (int i=0; i < IPN; i++) close(socks[i].sock);
+	cleanup(socks, lockf);
+
+	if (!isd) mysleep();
 }
