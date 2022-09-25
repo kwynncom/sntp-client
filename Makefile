@@ -3,4 +3,4 @@ sntp:					  *.c *.h
 		gcc   -g          main.c utils.c call.c -o debug -lm
 
 clean:
-	rm sntp debug *.o
+	rm -f sntp debug *.o
