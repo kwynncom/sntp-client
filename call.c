@@ -1,9 +1,9 @@
 #include <unistd.h> // read, write, close
 #include <stdio.h>  // stdout, fflush
 #include <time.h>   // timespec struct
-#include <stdlib.h>
+#include <stdlib.h> // rand
 #include <stdbool.h>
-#include <string.h>
+#include <string.h> // memcpy
 
 #include "utils.h"
 

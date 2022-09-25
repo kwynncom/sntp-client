@@ -7,9 +7,8 @@
 #include <time.h>   // timespec struct
 #include <math.h>
 #include <stdbool.h>
-#include <sys/file.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <sys/file.h> // LOCK_UN
+#include <unistd.h> // sleep, close
 
 #include "utils.h"
 

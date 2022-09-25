@@ -1,7 +1,4 @@
-#include <unistd.h> // read, write, close
-#include <sys/file.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <stdio.h> // FILE
 #include <stdbool.h>
 #include "utils.h"
 
