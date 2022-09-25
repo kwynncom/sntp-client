@@ -10,11 +10,11 @@ void main(int argc, char *argv[]) {
 	struct sockip socks[IPN];
     popSocks(socks);
 
-	bool isd, usefo;
-	procArgs(argc, argv, &isd, &usefo);
+	bool isd, usefo, dosleep;
+	procArgs(argc, argv, &isd, &usefo, &dosleep);
     call10(socks, isd, usefo);
 
 	cleanup(socks, lockf);
 
-	if (!isd) mysleep();
+	if (!isd && dosleep) mysleep();
 }

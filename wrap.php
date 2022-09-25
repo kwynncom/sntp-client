@@ -7,7 +7,7 @@ new sntpWrapper();
 
 class sntpWrapper {
 	
-const bin	    = __DIR__ . '/' . 'sntp';
+const bin	    = __DIR__ . '/' . 'sntp' . ' -nosleep';
 const maxS = 1;
 const NISTMaxS = 4;
 
@@ -22,6 +22,7 @@ private function sleep($b) {
     $ss = self::NISTMaxS - ((nanotime() - $b) / M_BILLION);
     if ($ss < 0) return;
     $sus = roint($ss * M_MILLION);
+	echo("Sleeping....\n");
     usleep($sus); 
 }
 private function sanityCheck($a) {
@@ -33,6 +34,7 @@ private function sanityCheck($a) {
     kwas($a[1] <= $a[2], 'server time sanity check fail between in and out');
     kwas($a[0] <  $a[3], 'server time sanity check internal out and in');
     $del = ($a[3] - $a[0]) / M_BILLION;
+	echo("Sanity check passes\n");
     return;
 }
 

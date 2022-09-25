@@ -43,12 +43,16 @@ FILE *getLockedFile() {
     return lockf;
 }
 
-void procArgs(int argc, char *argv[], bool *isd, bool *usefo) {
+void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep) {
 	*isd = *usefo = false;
+	*dosleep = true;
 	if (argc < 2) return;
 	int i;
-	for (i=1; i < argc; i++) if (strcmp("-d"	  , argv[i]) == 0) *isd   = true;
-	for (i=1; i < argc; i++) if (strcmp("-fifoout", argv[i]) == 0) *usefo = true;
+	for (i=1; i < argc; i++) {
+		if (strcmp("-d"		 , argv[i]) == 0) *isd		= true;
+		if (strcmp("-fifoout", argv[i]) == 0) *usefo    = true;
+		if (strcmp("-nosleep", argv[i]) == 0) *dosleep  = false;
+	}
 }
 
 

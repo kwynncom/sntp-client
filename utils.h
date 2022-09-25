@@ -23,7 +23,7 @@ struct sockip {
 
 void popSocks(struct sockip *socks);
 
-void procArgs(int argc, char *argv[], bool *isd, bool *usefo);
+void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep);
 
 FILE *getLockedFile();
 
