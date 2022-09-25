@@ -71,7 +71,7 @@ void popSocks(struct sockip *socks) {
 }
 
 void popIPs(char **a) {
-    if (0) { 
+    if (1) { 
         a[0] = "129.6.15.28";
         a[1] = "129.6.15.29";
         a[2] = "129.6.15.30";

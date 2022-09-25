@@ -3,6 +3,7 @@
 #include <time.h>   // timespec struct
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "utils.h"
 
@@ -16,23 +17,29 @@ void call10(struct sockip *socks) {
 
     unsigned long i = 0;
 
-    unsigned char pack[SNPL];
+    unsigned char pack[SNPL], packCache[SNPL];
     struct timespec bsts;
     struct timespec ests;
     srand(time(NULL));
-    int randi;
+    int randi, randiCache = 0;
+	bool didSend = false;
     
-    while (true) {
+     do {
+        setOBPack(pack);
+        randi = rand() % IPN;
+
         if (!onin()) return;
         if (ckq()) {
-            setOBPack(pack);
-            randi = rand() % IPN;
             ckq();
-            callServer(socks[randi].sock, &bsts, &ests, pack);
-        }
+			randiCache = randi;
+            callServer(socks[randiCache].sock, &bsts, &ests, pack);
+			didSend = true;
+        } else didSend = false;
 
-        output(       bsts,  ests, pack, socks[randi].ip);
-    }
+        output(       bsts,  ests, didSend ? pack : packCache, socks[randiCache].ip);
+        if (didSend) memcpy(packCache, pack, SNPL);
+		 
+    } while (true);
 }
 void decodeSNTPP(const char *p, unsigned long *sr, unsigned long *ss);
 void callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack) {

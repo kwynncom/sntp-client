@@ -1,3 +1,5 @@
+add sanity check to C (on second thought, doesn't really make sense)
+*****
 consider static linking
 have 2 buffers so that I don't have to conditionally reset.  One buffer in case of quota fail and one already cleared and ready to send.
 
