@@ -36,12 +36,9 @@ void call10(struct sockip *socks) {
 }
 void decodeSNTPP(const char *p, unsigned long *sr, unsigned long *ss);
 void callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
-
-    ssize_t ignoreForWarn;
-
     clock_gettime(CLOCK_REALTIME, bs);
     if (write(sock, pack, SNPL) != SNPL) perror("bad write");
-    if (read (sock, pack, SNPL) != SNPL) perror("bad read");
+    if (read (sock, pack, SNPL) != SNPL) perror("bad read" );
     clock_gettime(CLOCK_REALTIME, es);
 }
 
