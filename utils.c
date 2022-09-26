@@ -67,7 +67,7 @@ char *getAddr(char *ips) {
 	int argl;
 	argl = strlen(ips);
 	
-	if (argl < 7 || argl > 39) // "1.2.3.4" is 7 chars; IPv6 max 39 chars
+	if (argl < 3 || argl > 39) // "1.2.3.4" is 7 chars; IPv6 max 39 chars; ::1 is 3
 		{ fprintf(stderr, "bad IP length of %d\n", argl); exit(EXIT_FAILURE);}
 
 	if (strstr(ips, ".") == NULL) return ips;
@@ -107,7 +107,7 @@ int getOutboundUDPSock(char *addrStr, int port) {
 }
 
 void popIPs(char **a) {
-    if (1) { 
+    if (0) { 
         a[0] = "129.6.15.28";
         a[1] = "129.6.15.29";
         a[2] = "129.6.15.30";
@@ -115,10 +115,13 @@ void popIPs(char **a) {
         a[4] = "2610:20:6f15:15::27";
         a[5] = "129.6.15.26";
         a[6] = "2610:20:6f15:15::26";
-    } else {
+    } else if (0) {
         int i;
         for (i = 0; i < IPN; i++) a[i] = TESTIP;
-    }
+    } else if (1) {
+        int i;
+        for (i = 0; i < IPN; i++) a[i] = "::1";
+	}
 }
 
 long double Ufl() {
