@@ -1,3 +1,7 @@
+I put wrap.php and sntp in /usr/bin
+The chm repo points to wrap.php
+That seems to be my only usage
+*********
 add sanity check to C (on second thought, doesn't really make sense)
 *****
 consider static linking
