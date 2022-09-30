@@ -1,7 +1,7 @@
 #define KWSNTPDLOCKFILE "/tmp/kwsdl"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
 #define KWSNTPDPOKE		"/var/kwynn/mysd/poke"
-#define TESTIP			"34.193.238.16" // kwynn.com as of early 2022/09
+#define TESTIP			"2600:1f18:23ab:9500:7a93:a206:f823:20c3" // kwynn.com as of early 2022/09
 #define NISTMaxS 4.0
 #define IPN 7
 
@@ -13,17 +13,18 @@ void setOBPack(char *pack);
 #define M_MILLION 1000000
 #define SNPL 48 // SNTP packet length
 long double Ufl();
-#define MaxIPL 40
+#define MAXIPL 40
+#define MINIPL  3
 
 struct sockip {
-    char ip[MaxIPL];
+    char ip[MAXIPL];
     int  sock;
 };
 
 
-void popSocks(struct sockip *socks);
+void popSocks(struct sockip *socks, char *ip);
 
-void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, bool *qck);
+void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, bool *qck, char (*ip)[MAXIPL]);
 
 FILE *getLockedFile();
 

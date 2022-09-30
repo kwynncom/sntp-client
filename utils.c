@@ -24,11 +24,11 @@ void cleanup(struct sockip *socks, FILE *lockf) {
     fclose(lockf);
 }
 
-void popIPs(char **a);
+void popIPs(char **a, char *ipin);
 
-void popSocks(struct sockip *socks) {
+void popSocks(struct sockip *socks, char *ipin) {
     char *ips[IPN];
-    popIPs(ips);
+    popIPs(ips, ipin);
     int i;
     for (i=0; i < IPN; i++) {
         strcpy(socks[i].ip, ips[i]);
@@ -43,19 +43,25 @@ FILE *getLockedFile() {
     return lockf;
 }
 
-void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, bool *qck) {
+void setIP(char *ip);
+
+void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, bool *qck, char (*ip)[MAXIPL]) {
 	*isd = *usefo = false;
 	*dosleep = *qck = true;
 	if (argc < 2) return;
 	int i;
+	*ip[0] = '\0';
 	for (i=1; i < argc; i++) {
 		if (strcmp("-d"		 , argv[i]) == 0) *isd		= true;
 		if (strcmp("-fifoout", argv[i]) == 0) *usefo    = true;
 		if (strcmp("-nosleep", argv[i]) == 0) *dosleep  = false;
 		if (strcmp("-noqck"  , argv[i]) == 0) *qck      = false;
+		if (strcmp("-ip"  , argv[i]) == 0 && i < argc + 1 && strlen(argv[i + 1]) < MAXIPL) strcpy((char *)ip, argv[i + 1]);
+		
 	}
 }
 
+// setIP(char *ipout) {} 
 
 void setOBPack(char *pack) {
     memcpy(pack    , "#",  1); // SNTP packet header - see readme
@@ -67,7 +73,7 @@ char *getAddr(char *ips) {
 	int argl;
 	argl = strlen(ips);
 	
-	if (argl < 3 || argl > 39) // "1.2.3.4" is 7 chars; IPv6 max 39 chars; ::1 is 3
+	if (argl < MINIPL || argl > MAXIPL) // "1.2.3.4" is 7 chars; IPv6 max 39 chars; ::1 is 3
 		{ fprintf(stderr, "bad IP length of %d\n", argl); exit(EXIT_FAILURE);}
 
 	if (strstr(ips, ".") == NULL) return ips;
@@ -106,8 +112,19 @@ int getOutboundUDPSock(char *addrStr, int port) {
     return sock;
 }
 
-void popIPs(char **a) {
-    if (0) { 
+void popIPs(char **a, char *ipin) {
+
+	int i;
+
+	if (strlen(ipin) >= MINIPL) {
+		for (i = 0; i < IPN; i++) {
+			a[i] = (char *)malloc(MAXIPL);
+			strcpy(a[i], ipin);
+		}
+		return;
+	}
+
+    if (1) { 
         a[0] = "129.6.15.28";
         a[1] = "129.6.15.29";
         a[2] = "129.6.15.30";
@@ -115,13 +132,9 @@ void popIPs(char **a) {
         a[4] = "2610:20:6f15:15::27";
         a[5] = "129.6.15.26";
         a[6] = "2610:20:6f15:15::26";
-    } else if (0) {
-        int i;
-        for (i = 0; i < IPN; i++) a[i] = TESTIP;
-    } else if (1) {
-        int i;
-        for (i = 0; i < IPN; i++) a[i] = "::1";
-	}
+    } else if (0) for (i = 0; i < IPN; i++) a[i] = TESTIP;
+      else if (0) for (i = 0; i < IPN; i++) a[i] = "::1";
+	
 }
 
 long double Ufl() {
