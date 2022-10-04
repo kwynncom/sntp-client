@@ -14,7 +14,7 @@
 
 void mysleep() {
 	int sl = (int)round(NISTMaxS);
-	printf("Sleeping for %d seconds.  Zzzzz....\n", sl);
+	printf("Sleeping for %d seconds, from C.  Zzzzz....\n", sl);
 	sleep(sl);
 }
 
