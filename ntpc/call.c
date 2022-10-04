@@ -1,9 +1,9 @@
 #include <unistd.h> // read, write, close
 #include <stdio.h>  // stdout, fflush
 #include <time.h>   // timespec struct
-#include <stdlib.h> // rand
 #include <stdbool.h>
 #include <string.h> // memcpy
+#include <stdlib.h> // rand
 
 #include "utils.h"
 
@@ -13,18 +13,18 @@ void output(const struct timespec bs, const struct timespec es, const char *pack
 bool qckf(void);
 bool onin(void);
 
-void call10(struct sockip *socks, bool isd, bool usefo, bool qckb) {
+void call10(struct sockip *socks, bool isd, bool usefo, bool qckb, int rand1) {
 
     unsigned char pack[SNPL], packCache[SNPL];
     struct timespec bsts;
     struct timespec ests;
-    srand(time(NULL));
-    int randi, randiCache = 0;
+    int randi = rand1, randiCache = 0;
 	bool didSend = false;
     
      do {
         setOBPack(pack);
-        randi = rand() % IPN;
+
+		if (isd) randi = rand() % IPN;
 
         if (isd && !onin()) return;
         if (!qckb || qckf()) {

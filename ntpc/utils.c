@@ -26,14 +26,21 @@ void cleanup(struct sockip *socks, FILE *lockf) {
 
 void popIPs(char **a, char *ipin);
 
-void popSocks(struct sockip *socks, char *ipin) {
+int popSocks(struct sockip *socks, char *ipin, bool isd) {
     char *ips[IPN];
     popIPs(ips, ipin);
-    int i;
-    for (i=0; i < IPN; i++) {
+    int i = 0;
+
+	if (!isd) i = rand() % IPN;
+
+    for (; i < IPN; i++) {
         strcpy(socks[i].ip, ips[i]);
         socks[i].sock = getOutboundUDPSock(getAddr(ips[i]), 123);
+		if (!isd) break;
     }
+
+	if (!isd) return  i;
+	else	  return -1;
 }
 
 

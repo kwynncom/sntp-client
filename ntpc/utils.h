@@ -22,7 +22,7 @@ struct sockip {
 };
 
 
-void popSocks(struct sockip *socks, char *ip);
+int popSocks(struct sockip *socks, char *ip, bool isd);
 
 void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, bool *qck, char (*ip)[MAXIPL]);
 
