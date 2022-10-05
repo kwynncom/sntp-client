@@ -25,10 +25,9 @@ class sntp_wrapper {
 		kwas(is_readable(self::lockf), 'lock file does not exist or is not readable - sntpd kw');
 		$h = fopen(self::lockf, 'r');
 		$lok = flock($h, LOCK_EX | LOCK_NB);
-		if ($lok) {
-			shell_exec('nohup sntp -d -fifoout -nosleep -noqck < /dev/null > /dev/null 2>&1 &');
-		}
-		
+		flock($h, LOCK_UN);
+		fclose($h);
+		if ($lok) kwnohup('sntp -d -fifoout -nosleep -noqck');
 		$plock->unlock();
 		
 	}
