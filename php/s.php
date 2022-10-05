@@ -11,29 +11,42 @@ class sntp_wrapper {
 	const tlines   = 4;
 	const tchars   = 79;
 	const lockf    = '/var/kwynn/mysd/lock';
+	const fifoo    = '/var/kwynn/mysd/poke';
+	const fifoi    = '/var/kwynn/mysd/get';
 			
 	private function checkLockF() {
 		
 	}
 	
 	private function checkStart() {
-		if (!$this->isd) return;
+		$isd = $this->isd;
 		
-		$plock = new sem_lock(__FILE__);
-		$plock->lock();
+		if ($isd) {
+			$plock = new sem_lock(__FILE__);
+			$plock->lock();
+		}
 		
 		kwas(is_readable(self::lockf), 'lock file does not exist or is not readable - sntpd kw');
 		$h = fopen(self::lockf, 'r');
 		$lok = flock($h, LOCK_EX | LOCK_NB);
 		flock($h, LOCK_UN);
 		fclose($h);
-		if ($lok) kwnohup('sntp -d -fifoout -nosleep -noqck');
-		$plock->unlock();
+		if ($isd && $lok) kwnohup('sntp -d -fifoout -nosleep -noqck');
+		if ($isd) $plock->unlock();
+		if (!$lok) $this->isd = true;
 		
 	}
 	
 	private function rund() {
 		$this->checkStart();
+		$doc = isset($this->doclose);
+		if   ($doc) { $tos = 'x'; echo("Shutting down...\n"); }
+		else		$tos = 'a';
+		
+		if ($this->isd || $doc) file_put_contents(self::fifoo, $tos);
+		if ($doc) exit(0);
+		
+		if ($this->isd) $this->doout(file_get_contents(self::fifoi), 'fifo');
 	}
 	
 	
@@ -48,6 +61,9 @@ class sntp_wrapper {
 			switch($argv[$i]) {
 				case '-json' : $this->json = true; break;
 				case '-d'    : $this->isd  = true; break;
+				case  'x'	 :
+				case '-x'    : $this->doclose = true;
+					
 			}
 		}
 	}
@@ -58,8 +74,8 @@ class sntp_wrapper {
 			$this->procArgs();
 			$js = $this->json;
 			$this->setCmd();
-			$this->runShell();
 			$this->rund();
+			$this->runShell(); // must check for lock first, whether -d or not
 			$this->maybeSleep();
 		} catch(Exception $ex) {};
 		
@@ -71,19 +87,21 @@ class sntp_wrapper {
 	private function runShell() {
 		if ($this->isd) return false;
 		$t = shell_exec($this->cmdo);
-		if (!$this->json) echo($t);
-		$this->doout($t);
+		// if (!$this->json) echo($t);
+		$this->doout($t, 'single shell_exec');
 	}
 	
-	private function doout($t) {
+	private function doout(string $t, string $from) {
 		$a = $this->popValid($t);
 
 		if (!$this->json) { 
+			echo($t);
 			$min = min($a);
 			foreach($a as $n) echo(number_format($n - $min) . "\n");
 			echo(number_format(self::SNTPOffset($a)) . " = offset\n");
 			echo(number_format($a[1] - $a[0]) . " = out\n");
 			echo(number_format($a[3] - $a[2]) . " = in\n" );
+			echo('Source: ' . $from . "\n");
 			echo('Results **OK**' . "\n");
 		}		
 
