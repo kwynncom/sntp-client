@@ -1,4 +1,5 @@
-#define KWSNTPDLOCKFILE "/tmp/kwsdl"
+#define KWSNTPV "10/05 03:16 - new lock file location"
+#define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
 #define KWSNTPDPOKE		"/var/kwynn/mysd/poke"
 #define TESTIP			"2600:1f18:23ab:9500:7a93:a206:f823:20c3" // kwynn.com as of early 2022/09

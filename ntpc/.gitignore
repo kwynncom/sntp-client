@@ -2,4 +2,5 @@ sntp
 a.out
 debug
 *.o
-sntpkw2
+nohup.out
+

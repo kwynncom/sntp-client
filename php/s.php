@@ -10,45 +10,90 @@ class sntp_wrapper {
 	const ipi      = 4;
 	const tlines   = 4;
 	const tchars   = 79;
+	const lockf    = '/var/kwynn/mysd/lock';
+			
+	private function checkLockF() {
+		
+	}
+	
+	private function checkStart() {
+		if (!$this->isd) return;
+		
+		$plock = new sem_lock(__FILE__);
+		$plock->lock();
+		
+		kwas(is_readable(self::lockf), 'lock file does not exist or is not readable - sntpd kw');
+		$h = fopen(self::lockf, 'r');
+		$lok = flock($h, LOCK_EX | LOCK_NB);
+		if ($lok) {
+			shell_exec('nohup sntp -d -fifoout -nosleep -noqck < /dev/null > /dev/null 2>&1 &');
+		}
+		
+		$plock->unlock();
+		
+	}
+	
+	private function rund() {
+		$this->checkStart();
+	}
+	
+	
 	
 	private function procArgs() {
 		global $argv, $argc;
-	
+
 		$this->json = false;
-		for($i = 1; $i < $argc; $i++) if ($argv[$i] === '-json') { $this->json = true; break; }
+		$this->isd  = false;
+		
+		for($i = 1; $i < $argc; $i++) {
+			switch($argv[$i]) {
+				case '-json' : $this->json = true; break;
+				case '-d'    : $this->isd  = true; break;
+			}
+		}
 	}
 	
 	public function __construct() {
-		
-		$this->json = true;
-		
+	
 		try {
 			$this->procArgs();
 			$js = $this->json;
 			$this->setCmd();
-			$t = shell_exec($this->cmdo);
-			if (!$js) echo($t);
-			$a = $this->popValid($t);
-
-			if (!$js) { 
-				$min = min($a);
-				foreach($a as $n) echo(number_format($n - $min) . "\n");
-				echo(number_format(self::SNTPOffset($a)) . " = offset\n");
-				echo(number_format($a[1] - $a[0]) . " = out\n");
-				echo(number_format($a[3] - $a[2]) . " = in\n" );
-				echo('Results **OK**' . "\n");
-			}
-			
+			$this->runShell();
+			$this->rund();
 			$this->maybeSleep();
-			
 		} catch(Exception $ex) {};
 		
 		$this->json();
+
+	}
+
+	
+	private function runShell() {
+		if ($this->isd) return false;
+		$t = shell_exec($this->cmdo);
+		if (!$this->json) echo($t);
+		$this->doout($t);
 	}
 	
+	private function doout($t) {
+		$a = $this->popValid($t);
+
+		if (!$this->json) { 
+			$min = min($a);
+			foreach($a as $n) echo(number_format($n - $min) . "\n");
+			echo(number_format(self::SNTPOffset($a)) . " = offset\n");
+			echo(number_format($a[1] - $a[0]) . " = out\n");
+			echo(number_format($a[3] - $a[2]) . " = in\n" );
+			echo('Results **OK**' . "\n");
+		}		
+
+		$this->json();
+	}
+		
 	private function json() {
 		
-		if (!$this->json) return;
+		if (!$this->json || isset($this->jsonout)) return;
 		
 		$ret['status'] = false;
 		if (isset($this->ot4)) {
@@ -58,7 +103,8 @@ class sntp_wrapper {
 		
 		$ret['ip'] = $this->oip;
 		
-		kwjae($ret);
+		echo(json_encode($ret, JSON_PRETTY_PRINT));
+		$this->jsonout = true;
 	}
 	
 	private function maybeSleep() {
