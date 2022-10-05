@@ -31,7 +31,7 @@ class sntp_wrapper {
 		$lok = flock($h, LOCK_EX | LOCK_NB);
 		flock($h, LOCK_UN);
 		fclose($h);
-		if ($isd && $lok) kwnohup('sntp -d -fifoout -nosleep -noqck');
+		if ($isd && $lok) kwnohup('sntp -d -fifoout -nosleep');
 		if ($isd) $plock->unlock();
 		if (!$lok) $this->isd = true;
 		
