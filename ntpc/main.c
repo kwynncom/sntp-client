@@ -19,7 +19,5 @@ void main(int argc, char *argv[]) {
     rand1 = popSocks(socks, ip, isd);
     call10(socks, isd, usefo, qck, rand1);
 	cleanup(socks, lockf);
-	printf(KWSNTPV);
-	printf("\n");
 	if (!isd && dosleep) mysleep();
 }

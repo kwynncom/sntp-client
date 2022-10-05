@@ -22,6 +22,7 @@ void cleanup(struct sockip *socks, FILE *lockf) {
 	for (int i=0; i < IPN; i++) close(socks[i].sock);
     flock(fileno(lockf), LOCK_UN);
     fclose(lockf);
+	calllog(true);
 }
 
 void popIPs(char **a, char *ipin);

@@ -40,6 +40,7 @@ void call10(struct sockip *socks, bool isd, bool usefo, bool qckb, int rand1) {
 }
 void decodeSNTPP(const char *p, unsigned long *sr, unsigned long *ss);
 void callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
+	calllog(false);
     clock_gettime(CLOCK_REALTIME, bs);
     if (write(sock, pack, SNPL) != SNPL) perror("bad write");
     if (read (sock, pack, SNPL) != SNPL) perror("bad read" );
@@ -56,11 +57,13 @@ void output(const struct timespec bs, const struct timespec es, const char *pack
     
     decodeSNTPP(pack, &bsl, &esl);
 
-    printf (      fmt, b, bsl, esl, e, ip);
+    printf (fmt, b, bsl, esl, e, ip);
+	printf("Version: %s %s", KWSNTPV, "\n");
 
 	if (isd && usefo) {
 		FILE   *outf = fopen(KWSNTPDEXTGET, "w");
 		fprintf(outf, fmt, b, bsl, esl, e, ip);
+		fprintf(outf, "Version: %s %s", KWSNTPV, "\n");
 		fclose(outf);
 	}
 
