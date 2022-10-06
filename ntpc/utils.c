@@ -52,23 +52,16 @@ int popIPs(struct sockInfo *socks, const char *ipin, const bool isd) {
 
 		if (l > MAXIPL - 1) { printf("IP too long"); exit(2328); }
 
-		strcpy(socks[0].ip, ipin);
+		strncpy(socks[0].ip, ipin, MAXIPL);
 		socks[0].alwaysQuota = false;
 		for (i=0; i < IPN; i++) if (strcmp(ipin, nista[i]) == 0) socks[0].alwaysQuota = true;
 
 		return 1;
 	}
-
-	int randi = -1, picki;
-
-	if (!isd) randi = rand() % IPN;
 	
 	for (i=0; i < IPN; i++) {
-
-		if (!isd) picki = randi;
-		else	  picki = i;
-
-		strcpy(socks[i].ip, nista[picki]);
+		strncpy(socks[i].ip, nista[isd ? i : rand() % IPN], MAXIPL);
+		// strncpy(socks[i].ip, "127.0.0.1", MAXIPL);
 		socks[i].alwaysQuota = true;		
 		if (!isd) return 1;
 	}
@@ -92,15 +85,16 @@ FILE *getLockedFile() {
 void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, bool *qck, char (*ip)[MAXIPL]) {
 	*isd = *usefo = false;
 	*dosleep = *qck = true;
+	*ip[0] = '\0'; // need to do this now in case of return just below
+
 	if (argc < 2) return;
 	int i;
-	*ip[0] = '\0';
 	for (i=1; i < argc; i++) {
 		if (strcmp("-d"		 , argv[i]) == 0) *isd		= true;
 		if (strcmp("-fifoout", argv[i]) == 0) *usefo    = true;
 		if (strcmp("-nosleep", argv[i]) == 0) *dosleep  = false;
 		if (strcmp("-noqck"  , argv[i]) == 0) *qck      = false;
-		if (strcmp("-ip"  , argv[i]) == 0 && i < argc + 1 && strlen(argv[i + 1]) < MAXIPL) strcpy((char *)ip, argv[i + 1]);
+		if (strcmp("-ip"  , argv[i]) == 0 && i < argc + 1 && strlen(argv[i + 1]) < MAXIPL) strncpy((char *)ip, argv[i + 1], MAXIPL);
 		
 	}
 }
@@ -139,7 +133,9 @@ int getOutboundUDPSock(const char *addrStr, const int port) {
     bzero(&addro, sizeof(addro));
 
     addro.sin6_family = AF_INET6; 
-	if (inet_pton(AF_INET6, addrStr, &addro.sin6_addr) != 1) { fprintf(stderr, "bad IP address\n"); exit(EXIT_FAILURE); }
+	if (inet_pton(AF_INET6, addrStr, &addro.sin6_addr) != 1) { 
+		fprintf(stderr, "bad IP address (pton): %s\n", addrStr); exit(EXIT_FAILURE); 
+	}
     addro.sin6_port = htons(port);
 
     if ((sock = socket(AF_INET6, SOCK_DGRAM, 17)) < 0) { perror("socket creation failed"); exit(EXIT_FAILURE); }

@@ -1,4 +1,4 @@
-#define KWSNTPV "bug fix to non-d mode"
+#define KWSNTPV "failure to init IP bug fixed"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
@@ -19,8 +19,6 @@ unsigned long nanotime();
 char *getAddr(const char *ips);
 int getOutboundUDPSock(const char *addrStr, const int port);
 void setOBPack(char *pack);
-
-
 long double Ufl();
 
 struct sockInfo {
@@ -29,14 +27,8 @@ struct sockInfo {
 	bool alwaysQuota;
 };
 
-
 int popSocks(struct sockInfo *socks, const char *ip, const bool isd);
-
 void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, bool *qck, char (*ip)[MAXIPL]);
-
 FILE *getLockedFile();
-
-
 void cleanup(const struct sockInfo *socks, const FILE *lockf);
-
 void mysleep();

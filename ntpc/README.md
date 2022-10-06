@@ -33,6 +33,14 @@ SNTP - simple network time protocol
 https://tf.nist.gov/tf-cgi/servers.cgi
 Specifically, I'm using the 7 NIST servers in Gaithersburg, Maryland, USA.
 
+GORY TEDIUM
+
+Putting these lines in utisl.c::procArgs in the other order caused me some grief, but only when I statically linked.
+
+	*ip[0] = '\0'; // need to do this now in case of return just below
+	if (argc < 2) return;
+
+
 CREDITS
 
 https://zetcode.com/articles/cdatetime/ - Human-readable time for log.
