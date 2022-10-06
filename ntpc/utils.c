@@ -27,28 +27,56 @@ void cleanup(const struct sockInfo *socks, const FILE *lockf) {
 	calllog(false, 0, true);
 }
 
-int popIPs(struct sockInfo *socks, const char *ipin);
+int popIPs(struct sockInfo *socks, const char *ipin, const bool isd);
 
 int popSocks(struct sockInfo *socks, const char *ipin, const bool isd) {
     
-    int ipnl = popIPs(socks, ipin);
+    int ipnl = popIPs(socks, ipin, isd);
     int i = 0;
-	int maxi = 0;
 
-	if (!isd && IPN == ipnl) {
-		i = rand() % IPN;
-		maxi = IPN;
-	}
-	else { 
-		i = 0;
-		maxi = ipnl;
-	}
-
-    for (; i < ipnl; i++) socks[i].sock = getOutboundUDPSock(getAddr(socks[i].ip), 123);
+    for (i=0; i < ipnl; i++) socks[i].sock = getOutboundUDPSock(getAddr(socks[i].ip), 123);
    
-	if (ipnl < IPN && i > 0) return 0;
-	else if (!isd)			 return i;
-	else	  return -1;
+	if (isd && ipnl == IPN) return -1;
+	else return 0;
+}
+
+int popIPs(struct sockInfo *socks, const char *ipin, const bool isd) {
+
+	int i;
+							
+	const char *nista[IPN] = {         "129.6.15.26",         "129.6.15.27", "129.6.15.28", "129.6.15.29", "129.6.15.30", 
+							   "2610:20:6f15:15::26", "2610:20:6f15:15::27" }; /* https://tf.nist.gov/tf-cgi/servers.cgi */
+
+	const int l = strlen(ipin);
+	if (l >= MINIPL) {
+
+		if (l > MAXIPL - 1) { printf("IP too long"); exit(2328); }
+
+		strcpy(socks[0].ip, ipin);
+		socks[0].alwaysQuota = false;
+		for (i=0; i < IPN; i++) if (strcmp(ipin, nista[i]) == 0) socks[0].alwaysQuota = true;
+
+		return 1;
+	}
+
+	int randi = -1, picki;
+
+	if (!isd) randi = rand() % IPN;
+	
+	for (i=0; i < IPN; i++) {
+
+		if (!isd) picki = randi;
+		else	  picki = i;
+
+		strcpy(socks[i].ip, nista[picki]);
+		socks[i].alwaysQuota = true;		
+		if (!isd) return 1;
+	}
+
+	if (IPN == 7) return IPN;
+
+	printf("ERROR: expecting a specific IPN const / #define value");
+	exit(2154);
 }
 
 
@@ -126,35 +154,7 @@ int getOutboundUDPSock(const char *addrStr, const int port) {
     return sock;
 }
 
-int popIPs(struct sockInfo *socks, const char *ipin) {
 
-	int i;
-							
-	const char *nista[IPN] = {         "129.6.15.26",         "129.6.15.27", "129.6.15.28", "129.6.15.29", "129.6.15.30", 
-							   "2610:20:6f15:15::26", "2610:20:6f15:15::27" }; /* https://tf.nist.gov/tf-cgi/servers.cgi */
-
-	const int l = strlen(ipin);
-	if (l >= MINIPL) {
-
-		if (l > MAXIPL - 1) { printf("IP too long"); exit(2328); }
-
-		strcpy(socks[0].ip, ipin);
-		socks[0].alwaysQuota = false;
-		for (i=0; i < IPN; i++) if (strcmp(ipin, nista[i]) == 0) socks[0].alwaysQuota = true;
-
-		return 1;
-	}
-
-	for (i=0; i < IPN; i++) {
-		strcpy(socks[i].ip, nista[i]);
-		socks[i].alwaysQuota = true;		
-	}
-
-	if (IPN == 7) return IPN;
-
-	printf("ERROR: expecting a specific IPN const / #define value");
-	exit(2154);
-}
 
 long double Ufl() {
     struct timespec sts;
@@ -217,4 +217,30 @@ bool qckf() {
         return true;
     }
     return false;
+}
+
+void calllog(const bool newCall, const unsigned long Uus, const bool doClose ) {
+	static FILE *f = NULL;
+	static unsigned long prevts = 1;
+
+	int fpfr = 0;
+	char *fmt =  "%02d:%02d:%02d %02d/%02d/%04d %ld %s\n";
+
+	if (doClose && f != NULL) { fclose(f); return; }
+	if (f == NULL) f = fopen(LOGFILE, "a");
+
+	time_t rawtime;
+	if (!Uus) rawtime = time(NULL);
+	else      rawtime = (unsigned long)floorl(Uus / M_BILLION);
+	struct tm *t = localtime(&rawtime);
+	
+	if (newCall) {
+		fprintf(f, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900,	   rawtime, "");	
+		fflush(f);
+	} else {
+		char *cs = "";
+		if (Uus == prevts) cs = "(cached)";
+		printf(    fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900, Uus, cs);
+		prevts = Uus;
+	}
 }

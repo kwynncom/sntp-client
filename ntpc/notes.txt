@@ -1,3 +1,7 @@
+consider strncpy in most cases
+
+***********
+***************
 I put wrap.php and sntp in /usr/bin
 The chm repo points to wrap.php
 That seems to be my only usage

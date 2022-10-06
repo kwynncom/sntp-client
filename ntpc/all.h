@@ -1,4 +1,4 @@
-#define KWSNTPV "added bunches of consts"
+#define KWSNTPV "bug fix to non-d mode"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
