@@ -1,4 +1,4 @@
-#define KWSNTPV "sanity check through nanotime()"
+#define KWSNTPV "10/06 02:25"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"

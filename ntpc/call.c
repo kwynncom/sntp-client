@@ -84,10 +84,9 @@ void output(const struct timespec bs, const struct timespec es, const char *pack
 
 bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned long c, const unsigned long d) {
 	if (b > c) return false;
-	if (d < a) return false;
+	if (a > d) return false;
 	if (d - a > TOLERANCENS) return false;
 	if ((abs(d - c) + abs(b - a)) > TOLERANCENS) return false;
 	if (nanotime() - a > TOLERANCENS) return false;
 	return true;
-
 }
