@@ -4,13 +4,13 @@
 #include <time.h>   // timespec struct
 #include "all.h"
 
-void call10(struct sockip *socks, bool isd, bool usefo, bool qckb, int rand1);
+void call10(struct sockInfo *socks, bool isd, bool usefo, bool qckb, int rand1);
 
 void main(int argc, char *argv[]) {
 
     FILE   *lockf = getLockedFile();
     srand(time(NULL));
-	struct sockip socks[IPN];
+	struct sockInfo socks[IPN];
 	bool isd, usefo, dosleep, qck;
 	char ip[MAXIPL];
 	int rand1;

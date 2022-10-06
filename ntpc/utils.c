@@ -19,18 +19,18 @@ void mysleep() {
 	sleep(sl);
 }
 
-void cleanup(struct sockip *socks, FILE *lockf) {
+void cleanup(struct sockInfo *socks, FILE *lockf) {
 	for (int i=0; i < IPN; i++) close(socks[i].sock);
     flock(fileno(lockf), LOCK_UN);
     fclose(lockf);
 	calllog(false, 0, true);
 }
 
-int popIPs(char **a, char *ipin);
+int popIPs(struct sockInfo *socks, char *ipin);
 
-int popSocks(struct sockip *socks, char *ipin, bool isd) {
-    char *ips[IPN];
-    int ipnl = popIPs(ips, ipin);
+int popSocks(struct sockInfo *socks, char *ipin, bool isd) {
+    
+    int ipnl = popIPs(socks, ipin);
     int i = 0;
 	int maxi = 0;
 
@@ -43,11 +43,8 @@ int popSocks(struct sockip *socks, char *ipin, bool isd) {
 		maxi = ipnl;
 	}
 
-    for (; i < ipnl; i++) {
-        strcpy(socks[i].ip, ips[i]);
-        socks[i].sock = getOutboundUDPSock(getAddr(ips[i]), 123);
-    }
-
+    for (; i < ipnl; i++) socks[i].sock = getOutboundUDPSock(getAddr(socks[i].ip), 123);
+   
 	if (ipnl < IPN && i > 0) return 0;
 	else if (!isd)			 return i;
 	else	  return -1;
@@ -132,32 +129,36 @@ int getOutboundUDPSock(char *addrStr, int port) {
     return sock;
 }
 
-int popIPs(char **a, char *ipin) {
+int popIPs(struct sockInfo *socks, char *ipin) {
 
 	int i;
+							
+	const char *nista[IPN] = {         "129.6.15.26",         "129.6.15.27", "129.6.15.28", "129.6.15.29", "129.6.15.30", 
+							   "2610:20:6f15:15::26", "2610:20:6f15:15::27" }; /* https://tf.nist.gov/tf-cgi/servers.cgi */
 
-	if (strlen(ipin) >= MINIPL) {
-		a[0] = (char *)malloc(MAXIPL);
-		strcpy(a[0], ipin);
+	const int l = strlen(ipin);
+	if (l >= MINIPL) {
+
+		if (l > MAXIPL - 1) { printf("IP too long"); exit(2328); }
+
+		strcpy(socks[0].ip, ipin);
+		socks[0].alwaysQuota = false;
+		for (i=0; i < IPN; i++) if (strcmp(ipin, nista[i]) == 0) socks[0].alwaysQuota = true;
+
 		return 1;
 	}
 
-	/* US NIST timeservers, Gaithersburg, Maryland, USA, no encryption required */
-	a[0] = "129.6.15.26";
-	a[1] = "129.6.15.27";
-	a[2] = "129.6.15.28"; 
-	a[3] = "129.6.15.29";
-	a[4] = "129.6.15.30";
-	a[5] = "2610:20:6f15:15::26";
-	a[6] = "2610:20:6f15:15::27";
+	for (i=0; i < IPN; i++) {
+		strcpy(socks[i].ip, nista[i]);
+		socks[i].alwaysQuota = true;		
+	}
 
 	if (IPN == 7) return IPN;
 
-	errno = EFAULT; // You can't get this in GNU because they send a signal, but it's the closest I can find, off hand.
-	perror("expecting a specific IPN value"); // errno set by me
+	printf("ERROR: expecting a specific IPN value");
 	exit(2154);
 
-	
+	return -1;
 }
 
 long double Ufl() {

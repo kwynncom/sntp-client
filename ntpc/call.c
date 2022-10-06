@@ -14,7 +14,7 @@ void output(const struct timespec bs, const struct timespec es, const char *pack
 bool qckf(void);
 bool onin(void);
 
-void call10(struct sockip *socks, bool isd, bool usefo, bool qckb, int rand1) {
+void call10(struct sockInfo *socks, bool isd, bool usefo, bool qckb, int rand1) {
 
     unsigned char pack[SNPL], packCache[SNPL];
     struct timespec bsts;

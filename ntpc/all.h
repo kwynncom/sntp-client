@@ -1,4 +1,4 @@
-#define KWSNTPV "log consts"
+#define KWSNTPV "quota property of sock struct"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
@@ -20,13 +20,14 @@ long double Ufl();
 #define MAXIPL 40
 #define MINIPL  3
 
-struct sockip {
+struct sockInfo {
     char ip[MAXIPL];
     int  sock;
+	bool alwaysQuota;
 };
 
 
-int popSocks(struct sockip *socks, char *ip, bool isd);
+int popSocks(struct sockInfo *socks, char *ip, bool isd);
 
 void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, bool *qck, char (*ip)[MAXIPL]);
 
