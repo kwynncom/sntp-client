@@ -9,8 +9,9 @@
 #include <stdbool.h>
 #include <sys/file.h> // LOCK_UN
 #include <unistd.h> // sleep, close
+#include <errno.h>
 
-#include "utils.h"
+#include "all.h"
 
 void mysleep() {
 	int sl = (int)round(NISTMaxS);
@@ -22,32 +23,43 @@ void cleanup(struct sockip *socks, FILE *lockf) {
 	for (int i=0; i < IPN; i++) close(socks[i].sock);
     flock(fileno(lockf), LOCK_UN);
     fclose(lockf);
-	calllog(true, false, false, 0);
+	calllog(false, 0, true);
 }
 
-void popIPs(char **a, char *ipin);
+int popIPs(char **a, char *ipin);
 
 int popSocks(struct sockip *socks, char *ipin, bool isd) {
     char *ips[IPN];
-    popIPs(ips, ipin);
+    int ipnl = popIPs(ips, ipin);
     int i = 0;
+	int maxi = 0;
 
-	if (!isd) i = rand() % IPN;
+	if (!isd && IPN == ipnl) {
+		i = rand() % IPN;
+		maxi = IPN;
+	}
+	else { 
+		i = 0;
+		maxi = ipnl;
+	}
 
-    for (; i < IPN; i++) {
+    for (; i < ipnl; i++) {
         strcpy(socks[i].ip, ips[i]);
         socks[i].sock = getOutboundUDPSock(getAddr(ips[i]), 123);
-		if (!isd) break;
     }
 
-	if (!isd) return  i;
+	if (ipnl < IPN && i > 0) return 0;
+	else if (!isd)			 return i;
 	else	  return -1;
 }
 
 
 FILE *getLockedFile() {
     FILE   *lockf = fopen(KWSNTPDLOCKFILE, "w");
-    if (flock(fileno(lockf), LOCK_EX | LOCK_NB) != 0) { perror("fifo output lock failure - another process running\n"); exit(28); }
+    if (flock(fileno(lockf), LOCK_EX | LOCK_NB) != 0) { 
+		perror("fifo output lock failure - another process running\n"); // correct errno by default
+		exit(28); 
+	}
     return lockf;
 }
 
@@ -114,34 +126,37 @@ int getOutboundUDPSock(char *addrStr, int port) {
     timeout.tv_sec  = 1;
     timeout.tv_usec = 0;
 
-    if (setsockopt (sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0) perror("setsockopt failed\n");
-    if (connect(sock, (struct sockaddr *) &addro, sizeof(addro)) != 0) {  printf("connection with the server failed...\n"); exit(EXIT_FAILURE); } 
+    if (setsockopt (sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0) { perror("setsockopt failed\n"); exit(2236); }
+    if (connect(sock, (struct sockaddr *) &addro, sizeof(addro)) != 0) {  perror("connection with the server failed...\n"); exit(EXIT_FAILURE); } 
         
     return sock;
 }
 
-void popIPs(char **a, char *ipin) {
+int popIPs(char **a, char *ipin) {
 
 	int i;
 
 	if (strlen(ipin) >= MINIPL) {
-		for (i = 0; i < IPN; i++) {
-			a[i] = (char *)malloc(MAXIPL);
-			strcpy(a[i], ipin);
-		}
-		return;
+		a[0] = (char *)malloc(MAXIPL);
+		strcpy(a[0], ipin);
+		return 1;
 	}
 
-    if (1) { 
-        a[0] = "129.6.15.28";
-        a[1] = "129.6.15.29";
-        a[2] = "129.6.15.30";
-        a[3] = "129.6.15.27";
-        a[4] = "2610:20:6f15:15::27";
-        a[5] = "129.6.15.26";
-        a[6] = "2610:20:6f15:15::26";
-    } else if (0) for (i = 0; i < IPN; i++) a[i] = TESTIP;
-      else if (0) for (i = 0; i < IPN; i++) a[i] = "::1";
+	/* US NIST timeservers, Gaithersburg, Maryland, USA, no encryption required */
+	a[0] = "129.6.15.26";
+	a[1] = "129.6.15.27";
+	a[2] = "129.6.15.28"; 
+	a[3] = "129.6.15.29";
+	a[4] = "129.6.15.30";
+	a[5] = "2610:20:6f15:15::26";
+	a[6] = "2610:20:6f15:15::27";
+
+	if (IPN == 7) return IPN;
+
+	errno = EFAULT; // You can't get this in GNU because they send a signal, but it's the closest I can find, off hand.
+	perror("expecting a specific IPN value"); // errno set by me
+	exit(2154);
+
 	
 }
 

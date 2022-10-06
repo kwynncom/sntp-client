@@ -2,15 +2,14 @@
 #include <stdbool.h>
 #include <time.h>
 #include <math.h> // floorl
-#include "utils.h"
+#include "all.h"
 
-void calllog(bool doClose, bool toFile, bool newCall, unsigned long Uus) {
+void calllog(const bool newCall, const unsigned long Uus, const bool doClose ) {
 	static FILE *f = NULL;
-	int fpfr = 0;
-	char *fmt =  "%02d:%02d:%02d %02d/%02d/%04d %ld %s %s\n";
+	static unsigned long prevts = 1;
 
-	char *tofs = toFile  ? "" : "(stdout only)";
-	char *ncs  = newCall ? "" : "(cached)";
+	int fpfr = 0;
+	char *fmt =  "%02d:%02d:%02d %02d/%02d/%04d %ld %s\n";
 
 	if (doClose && f != NULL) { fclose(f); return; }
 	if (f == NULL) f = fopen(LOGFILE, "a");
@@ -20,8 +19,13 @@ void calllog(bool doClose, bool toFile, bool newCall, unsigned long Uus) {
 	else      rawtime = (unsigned long)floorl(Uus / M_BILLION);
 	struct tm *t = localtime(&rawtime);
 	
-	if (toFile) {
-		fprintf(f, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900,	   rawtime, ncs, tofs);	
+	if (newCall) {
+		fprintf(f, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900,	   rawtime, "");	
 		fflush(f);
-	} else printf(    fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900, rawtime, ncs, tofs);
+	} else {
+		char *cs = "";
+		if (Uus == prevts) cs = "(cached)";
+		printf(    fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900, Uus, cs);
+		prevts = Uus;
+	}
 }

@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h> // rand
 #include <time.h>   // timespec struct
-#include "utils.h"
+#include "all.h"
 
 void call10(struct sockip *socks, bool isd, bool usefo, bool qckb, int rand1);
 

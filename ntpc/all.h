@@ -1,13 +1,13 @@
-#define KWSNTPV "Uus as cached time"
+#define KWSNTPV "log consts"
+
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
 #define KWSNTPDPOKE		"/var/kwynn/mysd/poke"
 #define LOGFILE			"/tmp/snl.txt"
-#define TESTIP			"2600:1f18:23ab:9500:7a93:a206:f823:20c3" // kwynn.com as of early 2022/09
 #define NISTMaxS 4.0
 #define IPN 7
 
-void calllog(bool doClose, bool toFile, bool newCall, unsigned long Uus);
+void calllog(const bool newCall, const unsigned long Uus, const bool doClose);
 
 unsigned long nanotime();
 char *getAddr(char *ips);

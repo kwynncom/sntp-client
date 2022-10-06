@@ -4,8 +4,9 @@
 #include <stdbool.h>
 #include <string.h> // memcpy
 #include <stdlib.h> // rand
+#include <errno.h> // bad file descriptor and other error codes
 
-#include "utils.h"
+#include "all.h"
 
 void callServer(int sock, struct timespec *bs, struct timespec *es, char *pack);
 void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, bool isd, bool usefo, bool didSend);
@@ -24,7 +25,7 @@ void call10(struct sockip *socks, bool isd, bool usefo, bool qckb, int rand1) {
      do {
         setOBPack(pack);
 
-		if (isd) randi = rand() % IPN;
+		if (isd && rand1 < 0) randi = rand() % IPN;
 
         if (isd && !onin()) return;
         if (!qckb || qckf()) {
@@ -40,7 +41,10 @@ void call10(struct sockip *socks, bool isd, bool usefo, bool qckb, int rand1) {
 }
 void decodeSNTPP(const char *p, unsigned long *sr, unsigned long *ss);
 void callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
-	calllog(false, true, true, 0);
+
+	if (sock <= 0) { errno = EBADF; perror("bad socket to SNTP call"); exit(2216); }
+
+	calllog(true, 0, false);
     clock_gettime(CLOCK_REALTIME, bs);
     if (write(sock, pack, SNPL) != SNPL) perror("bad write");
     if (read (sock, pack, SNPL) != SNPL) perror("bad read" );
@@ -67,6 +71,6 @@ void output(const struct timespec bs, const struct timespec es, const char *pack
 		fclose(outf);
 	}
 
-	calllog(false, false, newCall, e);
+	calllog(false, b, false);
 
 }
