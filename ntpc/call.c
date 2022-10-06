@@ -52,6 +52,8 @@ void callServer(const int sock, struct timespec *bs, struct timespec *es, char *
     clock_gettime(CLOCK_REALTIME, es);
 }
 
+bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned long c, const unsigned long d);
+
 void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
 			const bool isd, const bool usefo, const bool newCall) {
 
@@ -74,5 +76,18 @@ void output(const struct timespec bs, const struct timespec es, const char *pack
 	}
 
 	calllog(false, b, false);
+
+	const bool ck = sanityCheck(b, bsl, esl, e);
+	if (ck) printf("**OK** - C - passess sanity check\n");
+	else    printf("fails C sanity check\n");
+}
+
+bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned long c, const unsigned long d) {
+	if (b > c) return false;
+	if (d < a) return false;
+	if (d - a > TOLERANCENS) return false;
+	if ((abs(d - c) + abs(b - a)) > TOLERANCENS) return false;
+	if (nanotime() - a > TOLERANCENS) return false;
+	return true;
 
 }

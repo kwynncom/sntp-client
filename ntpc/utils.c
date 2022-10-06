@@ -240,3 +240,9 @@ void calllog(const bool newCall, const unsigned long Uus, const bool doClose ) {
 		prevts = Uus;
 	}
 }
+
+unsigned long nanotime() {
+    struct timespec sts;
+	if (clock_gettime(CLOCK_REALTIME, &sts) != 0) return 0;
+    return sts.tv_sec * 1000000000 + sts.tv_nsec;
+}

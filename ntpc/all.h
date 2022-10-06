@@ -1,4 +1,4 @@
-#define KWSNTPV "failure to init IP bug fixed"
+#define KWSNTPV "sanity check through nanotime()"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
@@ -12,6 +12,8 @@
 #define SNPL   48 // SNTP packet length
 #define MAXIPL 40 // full IPv6 addr
 #define MINIPL  3 // ::1 is 3 chars
+
+#define TOLERANCENS M_BILLION
 
 
 void calllog(const bool newCall, const unsigned long Uus, const bool doClose);
