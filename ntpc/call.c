@@ -8,13 +8,14 @@
 
 #include "all.h"
 
-void callServer(int sock, struct timespec *bs, struct timespec *es, char *pack);
-void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, bool isd, bool usefo, bool didSend);
+void callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack);
+void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
+			const bool isd, const bool usefo, const bool didSend);
 
-bool qckf(void);
+bool qckf();
 bool onin(void);
 
-void call10(struct sockInfo *socks, bool isd, bool usefo, bool qckb, int rand1) {
+void call10(const struct sockInfo *socks, const bool isd, const bool usefo, const bool qckb, const int rand1) {
 
     unsigned char pack[SNPL], packCache[SNPL];
     struct timespec bsts;
@@ -28,7 +29,7 @@ void call10(struct sockInfo *socks, bool isd, bool usefo, bool qckb, int rand1) 
 		if (isd && rand1 < 0) randi = rand() % IPN;
 
         if (isd && !onin()) return;
-        if (!qckb || qckf()) {
+        if ((!(socks[randi].alwaysQuota || qckb)) || qckf()) {
  			randiCache = randi;
             callServer(socks[randiCache].sock, &bsts, &ests, pack);
 			didSend = true;
@@ -51,7 +52,8 @@ void callServer(const int sock, struct timespec *bs, struct timespec *es, char *
     clock_gettime(CLOCK_REALTIME, es);
 }
 
-void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, bool isd, bool usefo, bool newCall) {
+void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
+			const bool isd, const bool usefo, const bool newCall) {
 
     static char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\n";
     
@@ -62,7 +64,7 @@ void output(const struct timespec bs, const struct timespec es, const char *pack
     decodeSNTPP(pack, &bsl, &esl);
 
     printf (fmt, b, bsl, esl, e, ip);
-	printf("VERSION: %s %s", KWSNTPV, "\n");
+	printf("VERSION: %s\n", KWSNTPV);
 
 	if (isd && usefo) {
 		FILE   *outf = fopen(KWSNTPDEXTGET, "w");

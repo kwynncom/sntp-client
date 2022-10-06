@@ -19,16 +19,17 @@ void mysleep() {
 	sleep(sl);
 }
 
-void cleanup(struct sockInfo *socks, FILE *lockf) {
+void cleanup(const struct sockInfo *socks, const FILE *lockf) {
 	for (int i=0; i < IPN; i++) close(socks[i].sock);
-    flock(fileno(lockf), LOCK_UN);
-    fclose(lockf);
+
+    flock(fileno((FILE *)lockf), LOCK_UN);
+    fclose((FILE *)lockf);
 	calllog(false, 0, true);
 }
 
-int popIPs(struct sockInfo *socks, char *ipin);
+int popIPs(struct sockInfo *socks, const char *ipin);
 
-int popSocks(struct sockInfo *socks, char *ipin, bool isd) {
+int popSocks(struct sockInfo *socks, const char *ipin, const bool isd) {
     
     int ipnl = popIPs(socks, ipin);
     int i = 0;
@@ -60,8 +61,6 @@ FILE *getLockedFile() {
     return lockf;
 }
 
-void setIP(char *ip);
-
 void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, bool *qck, char (*ip)[MAXIPL]) {
 	*isd = *usefo = false;
 	*dosleep = *qck = true;
@@ -78,14 +77,12 @@ void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, boo
 	}
 }
 
-// setIP(char *ipout) {} 
-
 void setOBPack(char *pack) {
     memcpy(pack    , "#",  1); // SNTP packet header - see readme
     bzero (pack + 1,      47);
 }
 
-char *getAddr(char *ips) {
+char *getAddr(const char *ips) {
 
 	int argl;
 	argl = strlen(ips);
@@ -93,7 +90,7 @@ char *getAddr(char *ips) {
 	if (argl < MINIPL || argl > MAXIPL) // "1.2.3.4" is 7 chars; IPv6 max 39 chars; ::1 is 3
 		{ fprintf(stderr, "bad IP length of %d\n", argl); exit(EXIT_FAILURE);}
 
-	if (strstr(ips, ".") == NULL) return ips;
+	if (strstr((char *)ips, ".") == NULL) return (char *)ips;
 
 	if (argl > 15) { fprintf(stderr, "bad IPv4 address - too long\n"); exit(EXIT_FAILURE);}
 
@@ -106,7 +103,7 @@ char *getAddr(char *ips) {
 	return sbuf;
 }
 
-int getOutboundUDPSock(char *addrStr, int port) {
+int getOutboundUDPSock(const char *addrStr, const int port) {
 
     int sock;
 	struct sockaddr_in6 addro; // addr object, more of a PHP convention, but whatever
@@ -129,7 +126,7 @@ int getOutboundUDPSock(char *addrStr, int port) {
     return sock;
 }
 
-int popIPs(struct sockInfo *socks, char *ipin) {
+int popIPs(struct sockInfo *socks, const char *ipin) {
 
 	int i;
 							
@@ -155,10 +152,8 @@ int popIPs(struct sockInfo *socks, char *ipin) {
 
 	if (IPN == 7) return IPN;
 
-	printf("ERROR: expecting a specific IPN value");
+	printf("ERROR: expecting a specific IPN const / #define value");
 	exit(2154);
-
-	return -1;
 }
 
 long double Ufl() {
@@ -211,7 +206,8 @@ bool onin() {
 } // func
 
 bool qckf() {
-    static long double prev = 0;
+
+	static long double prev = 0;
     const long double now = Ufl();
     const long double d =  now - prev;
     const long double max = NISTMaxS;

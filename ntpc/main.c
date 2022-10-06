@@ -4,7 +4,7 @@
 #include <time.h>   // timespec struct
 #include "all.h"
 
-void call10(struct sockInfo *socks, bool isd, bool usefo, bool qckb, int rand1);
+void call10(const struct sockInfo *socks, const bool isd, const bool usefo, const bool qckb, const int rand1);
 
 void main(int argc, char *argv[]) {
 
