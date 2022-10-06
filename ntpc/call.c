@@ -8,7 +8,7 @@
 #include "utils.h"
 
 void callServer(int sock, struct timespec *bs, struct timespec *es, char *pack);
-void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, bool isd, bool usefo);
+void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, bool isd, bool usefo, bool didSend);
 
 bool qckf(void);
 bool onin(void);
@@ -33,21 +33,21 @@ void call10(struct sockip *socks, bool isd, bool usefo, bool qckb, int rand1) {
 			didSend = true;
         } else didSend = false;
 
-        output(       bsts,  ests, didSend ? pack : packCache, socks[randiCache].ip, isd, usefo);
+        output(       bsts,  ests, didSend ? pack : packCache, socks[randiCache].ip, isd, usefo, didSend);
         if (didSend) memcpy(packCache, pack, SNPL);
 		 
     } while (isd);
 }
 void decodeSNTPP(const char *p, unsigned long *sr, unsigned long *ss);
 void callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
-	calllog(false);
+	calllog(false, true, true, 0);
     clock_gettime(CLOCK_REALTIME, bs);
     if (write(sock, pack, SNPL) != SNPL) perror("bad write");
     if (read (sock, pack, SNPL) != SNPL) perror("bad read" );
     clock_gettime(CLOCK_REALTIME, es);
 }
 
-void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, bool isd, bool usefo) {
+void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, bool isd, bool usefo, bool newCall) {
 
     static char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\n";
     
@@ -58,13 +58,15 @@ void output(const struct timespec bs, const struct timespec es, const char *pack
     decodeSNTPP(pack, &bsl, &esl);
 
     printf (fmt, b, bsl, esl, e, ip);
-	printf("Version: %s %s", KWSNTPV, "\n");
+	printf("VERSION: %s %s", KWSNTPV, "\n");
 
 	if (isd && usefo) {
 		FILE   *outf = fopen(KWSNTPDEXTGET, "w");
 		fprintf(outf, fmt, b, bsl, esl, e, ip);
-		fprintf(outf, "Version: %s %s", KWSNTPV, "\n");
+		fprintf(outf, "VERSION: %s %s", KWSNTPV, "\n");
 		fclose(outf);
 	}
+
+	calllog(false, false, newCall, e);
 
 }

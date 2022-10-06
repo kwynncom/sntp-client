@@ -1,4 +1,4 @@
-#define KWSNTPV "10/05 05:24 - starting log"
+#define KWSNTPV "Uus as cached time"
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
 #define KWSNTPDPOKE		"/var/kwynn/mysd/poke"
@@ -7,7 +7,7 @@
 #define NISTMaxS 4.0
 #define IPN 7
 
-void calllog(bool doClose);
+void calllog(bool doClose, bool toFile, bool newCall, unsigned long Uus);
 
 unsigned long nanotime();
 char *getAddr(char *ips);

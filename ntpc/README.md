@@ -33,6 +33,11 @@ SNTP - simple network time protocol
 https://tf.nist.gov/tf-cgi/servers.cgi
 Specifically, I'm using the 7 NIST servers in Gaithersburg, Maryland, USA.
 
+CREDITS
+
+https://zetcode.com/articles/cdatetime/ - Human-readable time for log.
+
+
 HISTORY
 
 As of Sep 23, 2022, ./original/README.md existed.  It probably has interesting stuff.  
