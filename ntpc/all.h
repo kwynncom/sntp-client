@@ -1,4 +1,4 @@
-#define KWSNTPV "23:35 - rearranging output 3"
+#define KWSNTPV "10/07 00:17 - rc1"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
