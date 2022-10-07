@@ -292,11 +292,7 @@ void calllog(const bool newCall, const unsigned long Uus, const bool doClose, FI
 	
 	if (newCall) {
 		fprintf(f, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900,	   rawtime, cs);	
-		fflush(f);
-		printf (   fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900,	   rawtime, cs);
-		fflush(stdout);
-		if (genof != NULL) fprintf(genof, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900,	   rawtime, cs);
-
+		fflush(f); // note that you cannot write out fifo or stdout because I assume the first 4 lines are ns times
 	} else {
 		printf(        fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900, Uus, cs);
 		fflush(stdout);
