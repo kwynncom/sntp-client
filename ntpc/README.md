@@ -48,6 +48,10 @@ https://zetcode.com/articles/cdatetime/ - Human-readable time for log.
 
 HISTORY
 
+2022/10/07 00:58 - I made a GitHub commit comment that the C version was violating quota.  It was not.  It has no way to enforce quota with a 1-off 
+			call (as opposed to daemon) if -nosleep is given.
+
+****
 As of Sep 23, 2022, ./original/README.md existed.  It probably has interesting stuff.  
 
 The original version didn't assume NIST and didn't have a daemon version.  I may delete 

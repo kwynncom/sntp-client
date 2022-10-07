@@ -13,6 +13,7 @@ class sntp_wrapper {
 	const lockf    = '/var/kwynn/mysd/lock';
 	const fifoo    = '/var/kwynn/mysd/poke';
 	const fifoi    = '/var/kwynn/mysd/get';
+	const versions = '10/07 00:54 rc1';
 			
 	private function checkLockF() {
 		
@@ -104,15 +105,18 @@ class sntp_wrapper {
 			echo(number_format($a[1] - $a[0]) . " = out\n");
 			echo(number_format($a[3] - $a[2]) . " = in\n" );
 			echo('Source: ' . $from . "\n");
-			echo('PHP file date: ' . $this->getVersion() . "\n");
+			$this->outVersion();
 			echo('Results **OK**' . "\n");
 		}		
 
 		$this->jsonf();
 	}
 		
-	private function getVersion() {
-		return date('r', filemtime(__FILE__));
+	private function outVersion() {
+		$s  = '';
+		$s .= 'PHP file date: '  . date('r', filemtime(__FILE__)) . "\n";
+		$s .= 'PHP version msg: ' . self::versions . "\n";
+		echo($s);
 	}
 	
 	private function jsonf() {
