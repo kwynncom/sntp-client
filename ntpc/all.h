@@ -1,4 +1,4 @@
-#define KWSNTPV "10/06 02:25"
+#define KWSNTPV "23:29 - rearranging output 2"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
@@ -16,7 +16,7 @@
 #define TOLERANCENS M_BILLION
 
 
-void calllog(const bool newCall, const unsigned long Uus, const bool doClose);
+void calllog(const bool newCall, const unsigned long Uus, const bool doClose, FILE *genoutf);
 unsigned long nanotime();
 char *getAddr(const char *ips);
 int getOutboundUDPSock(const char *addrStr, const int port);
@@ -34,3 +34,11 @@ void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, boo
 FILE *getLockedFile();
 void cleanup(const struct sockInfo *socks, const FILE *lockf);
 void mysleep();
+
+bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned long c, const unsigned long d);
+
+void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
+			const bool isd, const bool usefo, const bool didSend);
+
+bool qckf();
+bool onin(void);

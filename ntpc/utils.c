@@ -24,7 +24,7 @@ void cleanup(const struct sockInfo *socks, const FILE *lockf) {
 
     flock(fileno((FILE *)lockf), LOCK_UN);
     fclose((FILE *)lockf);
-	calllog(false, 0, true);
+	calllog(false, 0, true, NULL);
 }
 
 int popIPs(struct sockInfo *socks, const char *ipin, const bool isd);
@@ -215,7 +215,62 @@ bool qckf() {
     return false;
 }
 
-void calllog(const bool newCall, const unsigned long Uus, const bool doClose ) {
+
+
+unsigned long nanotime() {
+    struct timespec sts;
+	if (clock_gettime(CLOCK_REALTIME, &sts) != 0) return 0;
+    return sts.tv_sec * 1000000000 + sts.tv_nsec;
+}
+
+bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned long c, const unsigned long d) {
+	if (b > c) return false;
+	if (a > d) return false;
+	if (d - a > TOLERANCENS) return false;
+	if ((abs(d - c) + abs(b - a)) > TOLERANCENS) return false;
+	if (nanotime() - a > TOLERANCENS) return false;
+	return true;
+}
+
+void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
+			const bool isd, const bool usefo, const bool newCall) {
+
+    static char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\n";
+    
+    const unsigned long b = bs.tv_sec * M_BILLION + bs.tv_nsec;
+    const unsigned long e = es.tv_sec * M_BILLION + es.tv_nsec;  
+    unsigned long bsl, esl;
+    
+    decodeSNTPP(pack, &bsl, &esl);
+
+    printf (fmt, b, bsl, esl, e, ip);
+	printf("VERSION: %s\n", KWSNTPV);
+
+	FILE   *outf = NULL;
+	if (isd && usefo) {
+		outf = fopen(KWSNTPDEXTGET, "w"); if (outf == NULL) { perror("output file (fifo) open fail"); exit(2322); }
+		fprintf(outf, fmt, b, bsl, esl, e, ip);
+		fprintf(outf, "VERSION: %s %s", KWSNTPV, "\n");
+	}
+
+	calllog(false, b, false, outf);
+
+	const bool ck = sanityCheck(b, bsl, esl, e);
+	if (ck) {
+			const char *pss = "**OK** - C - passess sanity check\n";
+			printf("%s", pss);
+			if (outf != NULL) fprintf(outf, "%s", pss);
+	}
+	else   {
+		const char *fss = "fails C sanity check\n";
+		 printf("%s", fss);
+		 if (outf != NULL) fprintf(outf, "%s", fss);
+	}
+	
+	if (outf != NULL) fclose(outf);
+}
+
+void calllog(const bool newCall, const unsigned long Uus, const bool doClose, FILE *genof ) {
 	static FILE *f = NULL;
 	static unsigned long prevts = 1;
 
@@ -229,20 +284,26 @@ void calllog(const bool newCall, const unsigned long Uus, const bool doClose ) {
 	if (!Uus) rawtime = time(NULL);
 	else      rawtime = (unsigned long)floorl(Uus / M_BILLION);
 	struct tm *t = localtime(&rawtime);
+
+	char *cs = "(unk - should not happen)";
+	if (Uus == prevts && !newCall) cs = "(cached / quota fail)";
+	else if (newCall) cs = "";
+	else cs = "(after call with ns)";
 	
 	if (newCall) {
-		fprintf(f, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900,	   rawtime, "");	
+		fprintf(f, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900,	   rawtime, cs);	
 		fflush(f);
-	} else {
-		char *cs = "";
-		if (Uus == prevts) cs = "(cached)";
-		printf(    fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900, Uus, cs);
-		prevts = Uus;
-	}
-}
+		printf (   fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900,	   rawtime, cs);
+		fflush(stdout);
+		if (genof != NULL) fprintf(genof, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900,	   rawtime, cs);
 
-unsigned long nanotime() {
-    struct timespec sts;
-	if (clock_gettime(CLOCK_REALTIME, &sts) != 0) return 0;
-    return sts.tv_sec * 1000000000 + sts.tv_nsec;
+	} else {
+		printf(        fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900, Uus, cs);
+		fflush(stdout);
+		if (genof != NULL) fprintf(genof, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900,	Uus, cs);
+		fflush(genof);
+		prevts = Uus;
+
+		
+	}
 }

@@ -9,11 +9,6 @@
 #include "all.h"
 
 void callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack);
-void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
-			const bool isd, const bool usefo, const bool didSend);
-
-bool qckf();
-bool onin(void);
 
 void call10(const struct sockInfo *socks, const bool isd, const bool usefo, const bool qckb, const int rand1) {
 
@@ -45,48 +40,9 @@ void callServer(const int sock, struct timespec *bs, struct timespec *es, char *
 
 	if (sock <= 0) { errno = EBADF; perror("bad socket to SNTP call"); exit(2216); }
 
-	calllog(true, 0, false);
+	calllog(true, 0, false, NULL);
     clock_gettime(CLOCK_REALTIME, bs);
     if (write(sock, pack, SNPL) != SNPL) perror("bad write");
     if (read (sock, pack, SNPL) != SNPL) perror("bad read" );
     clock_gettime(CLOCK_REALTIME, es);
-}
-
-bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned long c, const unsigned long d);
-
-void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
-			const bool isd, const bool usefo, const bool newCall) {
-
-    static char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\n";
-    
-    const unsigned long b = bs.tv_sec * M_BILLION + bs.tv_nsec;
-    const unsigned long e = es.tv_sec * M_BILLION + es.tv_nsec;  
-    unsigned long bsl, esl;
-    
-    decodeSNTPP(pack, &bsl, &esl);
-
-    printf (fmt, b, bsl, esl, e, ip);
-	printf("VERSION: %s\n", KWSNTPV);
-
-	if (isd && usefo) {
-		FILE   *outf = fopen(KWSNTPDEXTGET, "w");
-		fprintf(outf, fmt, b, bsl, esl, e, ip);
-		fprintf(outf, "VERSION: %s %s", KWSNTPV, "\n");
-		fclose(outf);
-	}
-
-	calllog(false, b, false);
-
-	const bool ck = sanityCheck(b, bsl, esl, e);
-	if (ck) printf("**OK** - C - passess sanity check\n");
-	else    printf("fails C sanity check\n");
-}
-
-bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned long c, const unsigned long d) {
-	if (b > c) return false;
-	if (a > d) return false;
-	if (d - a > TOLERANCENS) return false;
-	if ((abs(d - c) + abs(b - a)) > TOLERANCENS) return false;
-	if (nanotime() - a > TOLERANCENS) return false;
-	return true;
 }
