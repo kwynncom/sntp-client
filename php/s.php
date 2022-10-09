@@ -11,7 +11,7 @@ class sntp_wrapper {
 	const lockf    = '/var/kwynn/mysd/lock';
 	const fifoo    = '/var/kwynn/mysd/poke';
 	const fifoi    = '/var/kwynn/mysd/get';
-	const versions = '10/09 01:55 rc2 - better error handling';
+	const versions = '10/09 03:02 rc2 - better error handling 2';
 	
 	private function checkStart() {
 		$isd = $this->isd;
@@ -106,7 +106,9 @@ class sntp_wrapper {
 			echo(number_format($a[3] - $a[2]) . " = in\n" );
 			echo('Source: ' . $from . "\n");
 			$this->outVersion();
-			echo('Results **OK**' . "\n");
+			if ($this->sane)
+				 echo('Results **OK**' . "\n");
+			else echo("sanity failures\n");
 		}		
 
 		$this->jsonf();
@@ -159,6 +161,7 @@ class sntp_wrapper {
 	}
 	
 	private function popValid($t) {
+		$this->sane = false;
 		$a = [];
 		try {
 			$ret = sntpSanity::ck($t, !$this->dojson);
@@ -168,6 +171,7 @@ class sntp_wrapper {
 			}
 			$a = $this->ot4 = $ret['Uns4'];
 			$this->oip = $ret['ip'];
+			$this->sane = $ret['sane'];
 		} catch(Exception $ex) {
 			if ($this->dojson) throw $ex;
 			echo("PHP Santiy check failed with " . $ex->getMessage() . "\nRaw Text: $t\n");
