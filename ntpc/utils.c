@@ -257,7 +257,7 @@ void output(const struct timespec bs, const struct timespec es, const char *pack
 
 	const bool ck = sanityCheck(b, bsl, esl, e);
 	if (ck) {
-			const char *pss = "**OK** - C - passess sanity check\n";
+			const char *pss = "**OK** - C - passes sanity check\n";
 			printf("%s", pss);
 			if (outf != NULL) fprintf(outf, "%s", pss);
 	}
