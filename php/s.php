@@ -11,7 +11,7 @@ class sntp_wrapper {
 	const lockf    = '/var/kwynn/mysd/lock';
 	const fifoo    = '/var/kwynn/mysd/poke';
 	const fifoi    = '/var/kwynn/mysd/get';
-	const versions = '10/09 00:24 rc2 - text parse to kwutils';
+	const versions = '10/09 01:55 rc2 - better error handling';
 	
 	private function checkStart() {
 		$isd = $this->isd;
@@ -83,8 +83,14 @@ class sntp_wrapper {
 	
 	private function runShell() {
 		if ($this->isd) return false;
-		$t = shell_exec($this->cmdo);
+		$t = $this->safeCall();
 		$this->doout($t, 'single shell_exec');
+	}
+	
+	private function safeCall() {
+		$t = shell_exec($this->cmdo);
+		if (!$t) $t = '';
+		return $t;
 	}
 	
 	private function doout(string $t, string $from) {
@@ -153,10 +159,20 @@ class sntp_wrapper {
 	}
 	
 	private function popValid($t) {
-		$ret = SNTPTextToArr ($t);
-		kwas($ret, 'SNTP text to array fail');
-		$a = $this->ot4 = $ret['Uns4'];
-		$this->oip = $ret['ip'];
+		$a = [];
+		try {
+			$ret = sntpSanity::ck($t, !$this->dojson);
+			if (!$ret) {
+				if (!$this->dojson) echo("**Fail\n");
+				exit(153);
+			}
+			$a = $this->ot4 = $ret['Uns4'];
+			$this->oip = $ret['ip'];
+		} catch(Exception $ex) {
+			if ($this->dojson) throw $ex;
+			echo("PHP Santiy check failed with " . $ex->getMessage() . "\nRaw Text: $t\n");
+			exit(117);
+		}
 		return $a;
 	}
 	
