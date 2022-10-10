@@ -11,7 +11,7 @@ class sntp_wrapper {
 	const lockf    = '/var/kwynn/mysd/lock';
 	const fifoo    = '/var/kwynn/mysd/poke';
 	const fifoi    = '/var/kwynn/mysd/get';
-	const versions = '10/10 02:42';
+	const versions = '10/10 03:49 - test lock again';
 	
 	private function checkStart() {
 		$isd = $this->isd;
@@ -20,16 +20,25 @@ class sntp_wrapper {
 			$plock = new sem_lock(__FILE__);
 			$plock->lock();
 		}
+
+		$lok = $this->iGetLock();
+
+		if ($isd && $lok) {
+			kwnohup('sntp -d -fifoout -nosleep');
+			usleep(100000);
+		}
+		if ($isd) $plock->unlock();
+		if (!$lok) $this->isd = true;
 		
+	}
+	
+	private function iGetLock() {
 		kwas(is_readable(self::lockf), 'lock file does not exist or is not readable - sntpd kw');
 		$h = fopen(self::lockf, 'r');
 		$lok = flock($h, LOCK_EX | LOCK_NB);
 		flock($h, LOCK_UN);
 		fclose($h);
-		if ($isd && $lok) kwnohup('sntp -d -fifoout -nosleep');
-		if ($isd) $plock->unlock();
-		if (!$lok) $this->isd = true;
-		
+		return $lok;
 	}
 	
 	private function rund() {
@@ -38,13 +47,28 @@ class sntp_wrapper {
 		if   ($doc) { $tos = 'x'; echo("Shutting down...\n"); }
 		else		$tos = 'a';
 		
-		if ($this->isd || $doc) file_put_contents(self::fifoo, $tos);
+		if ($this->isd || $doc) $this->fifoout($tos);
 		if ($doc) exit(0);
 		
-		if ($this->isd) $this->doout(file_get_contents(self::fifoi), 'fifo');
+		if ($this->isd) $this->doout($this->fifoin(), 'fifo');
 	}
 	
+	private function fifoout($tos) {
+		if ($this->iGetLock()) die('should not get lock before fopen fifoout' . "\n");			
+		$h = fopen(self::fifoo, 'w');
+		fwrite($h, $tos);
+		fclose($h);
+	}
 	
+	private function fifoin() {
+		if ($this->iGetLock()) die('should not get lock before fopen fifoout' . "\n");
+		$h = fopen(self::fifoi, 'r');
+		$s = '';
+		while($l = fgets($h)) $s .= $l;
+		fclose($h);
+		return $s;
+		
+	}
 	
 	private function procArgs() {
 		global $argv, $argc;

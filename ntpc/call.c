@@ -39,7 +39,7 @@ void call10(const struct sockInfo *socks, const bool isd, const bool usefo, cons
 void decodeSNTPP(const char *p, unsigned long *sr, unsigned long *ss);
 bool callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
 
-	if (sock <= 0) { printf("bad socket to SNTP call"); exit(2216); }
+	if (sock <= 0) { fprintf(stderr, "bad socket to SNTP call"); return false; }
 
 	calllog(true, 0, false, NULL);
     clock_gettime(CLOCK_REALTIME, bs);

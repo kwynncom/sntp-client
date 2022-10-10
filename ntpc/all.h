@@ -1,4 +1,4 @@
-#define KWSNTPV "10/10 02:36 - notes almost done"
+#define KWSNTPV "10/10 02:56 - notes done"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
