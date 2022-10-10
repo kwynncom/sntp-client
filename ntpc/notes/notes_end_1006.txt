@@ -1,0 +1,38 @@
+consider strncpy in most cases
+
+***********
+***************
+I put wrap.php and sntp in /usr/bin
+The chm repo points to wrap.php
+That seems to be my only usage
+*********
+add sanity check to C (on second thought, doesn't really make sense)
+*****
+consider static linking
+have 2 buffers so that I don't have to conditionally reset.  One buffer in case of quota fail and one already cleared and ready to send.
+
+*******
+The stuff below became irrelevant because I'm outputting the timestamp directly--I did the SNTP packet parse in C.
+***********
+apt-cache search libb64
+libb64-0d - base64 encoding/decoding library - runtime library
+libb64-dev - base64 encoding/decoding library - development files
+
+apt-cache policy libb64-0d
+libb64-0d:
+  Installed: (none)
+  Candidate: 1.2-5
+
+https://github.com/BuLogics/libb64/blob/master/examples/c-example1.c
+
+https://libb64.sourceforge.net/ - less useful, off hand
+
+https://gist.github.com/alan-mushi/19546a0e2c6bd4e059fd  - JSON
+
+apt-cache policy libjson-c5
+libjson-c5:
+  Installed: 0.15-3~ubuntu1.22.04.1
+  Candidate: 0.15-3~ubuntu1.22.04.1
+
+https://github.com/jehiah/json-c
+

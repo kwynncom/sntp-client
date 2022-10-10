@@ -1,4 +1,4 @@
-#define KWSNTPV "10/09 00:01 - rc2 - spell check"
+#define KWSNTPV "10/10 01:02 - stderr"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"

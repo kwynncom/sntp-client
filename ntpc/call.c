@@ -38,11 +38,11 @@ void call10(const struct sockInfo *socks, const bool isd, const bool usefo, cons
 void decodeSNTPP(const char *p, unsigned long *sr, unsigned long *ss);
 void callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
 
-	if (sock <= 0) { errno = EBADF; perror("bad socket to SNTP call"); exit(2216); }
+	if (sock <= 0) { printf("bad socket to SNTP call"); exit(2216); }
 
 	calllog(true, 0, false, NULL);
     clock_gettime(CLOCK_REALTIME, bs);
-    if (write(sock, pack, SNPL) != SNPL) perror("bad write");
-    if (read (sock, pack, SNPL) != SNPL) perror("bad read" );
+    if (write(sock, pack, SNPL) != SNPL) fprintf(stderr, "bad write");
+    if (read (sock, pack, SNPL) != SNPL) fprintf(stderr, "bad read" );
     clock_gettime(CLOCK_REALTIME, es);
 }
