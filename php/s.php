@@ -6,19 +6,24 @@ require_once('/opt/kwynn/kwutils.php');
 class sntp_wrapper {
 	
 	const cmdBase = 'sntp -nosleep'; // sleeping in PHP.  If I sleep in C, then the PHP sanity check fails, and I don't get my output for 4 seconds.
+	const cmdrunner  = 'sntpr';
 	const maxNISTS = 4;
 	const tchars   = 79;
 	const lockf    = '/var/kwynn/mysd/lock';
 	const fifoo    = '/var/kwynn/mysd/poke';
 	const fifoi    = '/var/kwynn/mysd/get';
-	const versions = '10/10 04:35 - fifo nohup echo - one way';
+	const versions = '10/10 19:28 - Try again - really using new C wrapper'; 
+	
+	public function __destruct() {
+		if (kwifs($this, 'plock')) $this->plock->unlock();	
+	}
 	
 	private function checkStart() {
 		$isd = $this->isd;
 		
 		if ($isd) {
-			$plock = new sem_lock(__FILE__);
-			$plock->lock();
+			$this->plock = new sem_lock(__FILE__);
+			$this->plock->lock();
 		}
 
 		$lok = $this->iGetLock();
@@ -26,7 +31,7 @@ class sntp_wrapper {
 		if ($isd && $lok) {
 			kwnohup('sntp -d -fifoout -nosleep');
 		}
-		if ($isd) $plock->unlock();
+		if ($isd) $this->plock->unlock();
 		if (!$lok) $this->isd = true;
 		
 	}
@@ -42,42 +47,22 @@ class sntp_wrapper {
 	
 	private function rund() {
 		$this->checkStart();
+		
+		if (!$this->isd) return;
+		
 		$doc = isset($this->doclose);
-		if   ($doc) { $tos = 'x'; echo("Shutting down...\n"); }
+		if   ($doc) $tos = 'x'; 
 		else		$tos = 'a';
 		
-		if ($this->isd || $doc) $this->fifoout($tos);
-		if ($doc) exit(0);
-		
-		if ($this->isd) $this->doout($this->fifoin(), 'fifo');
-	}
-	
-	private function fifoout($tos) {
-		$pid = pcntl_fork();
-		if ($pid == 0) {
-			file_put_contents(self::fifoo, $tos);
-			exit(0);
-		}
-		
-	}
-	
-	private function fifoin() {
-		$pid = pcntl_fork();
-		if ($pid == 0) return file_get_contents(self::fifoi);
-		else { 
-			$status;
-			$i = 0;
-			while ($i++ < 10) {
-			
-				usleep(100000);
-				pcntl_wait($status, WNOHANG);
-				if (pcntl_wifexited($status)) break;
-				
-			}
+		$rres = shell_exec(self::cmdrunner . ' ' . $tos);
+		if (kwifs($this, 'plock')) $this->plock->unlock();
 
+		if ($doc) {
+			echo("Shutting down (from PHP)...\n");
 			exit(0);
 		}
 		
+		$this->doout($rres, 'fifo');
 	}
 	
 	private function procArgs() {

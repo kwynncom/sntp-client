@@ -1,4 +1,4 @@
-#define KWSNTPV "10/10 18:50 - rc 1"
+#define KWSNTPV "10/10 19:18 - usefo === isd"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
@@ -35,7 +35,7 @@ struct sockInfo {
 };
 
 int popSocks(struct sockInfo *socks, const char *ip, const bool isd);
-void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, bool *qck, char (*ip)[MAXIPL]);
+void procArgs(int argc, char *argv[], bool *isd, bool *dosleep, bool *qck, char (*ip)[MAXIPL]);
 FILE *getLockedFile();
 void cleanup(const struct sockInfo *socks, const FILE *lockf);
 void mysleep();
@@ -43,7 +43,7 @@ void mysleep();
 bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned long c, const unsigned long d);
 
 bool myoutf(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
-			const bool isd, const bool usefo, const bool didSend);
+			const bool isd, const bool didSend);
 
 bool qckf();
 bool onin(void);

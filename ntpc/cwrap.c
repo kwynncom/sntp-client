@@ -4,13 +4,23 @@
 #include <stdlib.h> // struct timespec
 #include <fcntl.h> // open
 #include "all.h"
-#define crwversion "10/10 18:48"
+#define crwversion "10/10 19:27"
 
-void mywrite() {
-	int wd;
-	const char *b = "a";
-	int sz = strlen(b);
-	wd = open(KWSNTPDPOKE, O_WRONLY | O_NONBLOCK);
+
+bool shouldCloseF(const int argc, const char *argv[]) {
+	for (int i=1; i < argc; i++) {
+		if (strcmp(argv[i],  "x") == 0) return true;
+		if (strcmp(argv[i], "-x") == 0) return true;		
+	}
+
+	return false;
+}
+
+void mywrite(const bool sc) {
+	char *b = "a";
+	if (sc) b = "x";
+	const int sz = strlen(b);
+	const int wd = open(KWSNTPDPOKE, O_WRONLY | O_NONBLOCK);
 	write(wd, b, sz);
 	close(wd);	
 }
@@ -40,7 +50,7 @@ void myread() {
 	printf("%s %s\n", "C FIFO runner / wrapper VERSION: ", crwversion);
 }
 
-void main(void) { // I will need to account for the exit "x" rather than non-x
-	mywrite();
+void main(const int argc, const char *argv[]) { // I will need to account for the exit "x" rather than non-x
+	mywrite(shouldCloseF(argc, argv));
 	myread();
 }

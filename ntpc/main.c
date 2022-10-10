@@ -4,7 +4,7 @@
 #include <time.h>   // timespec struct
 #include "all.h"
 
-void call10(const struct sockInfo *socks, const bool isd, const bool usefo, const bool qckb, const int randOne);
+void call10(const struct sockInfo *socks, const bool isd, const bool qckb, const int randOne);
 
 void main(int argc, char *argv[]) {
 
@@ -12,13 +12,13 @@ void main(int argc, char *argv[]) {
 	if (lockf == NULL) { fprintf(stderr, "could not open and lock lockfile\n"); exit(150); /* safe to exit because nothing has been done */ }
     srand(time(NULL));
 	struct sockInfo socks[IPN];
-	bool isd, usefo, dosleep, qck;
+	bool isd, dosleep, qck;
 	char ip[MAXIPL];
 	int randOne;
 		
-	procArgs(argc, argv, &isd, &usefo, &dosleep, &qck, &ip);
+	procArgs(argc, argv, &isd, &dosleep, &qck, &ip);
     randOne = popSocks(socks, ip, isd);
-	if (randOne >= 0) call10(socks, isd, usefo, qck, randOne);
+	if (randOne >= 0) call10(socks, isd, qck, randOne);
 	cleanup(socks, lockf);
 	if (!isd && dosleep && randOne >= 0) mysleep();
 }

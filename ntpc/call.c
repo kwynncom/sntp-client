@@ -10,7 +10,7 @@
 
 bool callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack);
 
-void call10(const struct sockInfo *socks, const bool isd, const bool usefo, const bool qckb, const int randOne) {
+void call10(const struct sockInfo *socks, const bool isd, const bool qckb, const int randOne) {
 
     unsigned char pack[SNPL], packCache[SNPL];
     struct timespec bsts;
@@ -31,7 +31,7 @@ void call10(const struct sockInfo *socks, const bool isd, const bool usefo, cons
 			didSend = true;
         } else didSend = false;
 
-        if (!myoutf(       bsts,  ests, didSend ? pack : packCache, socks[randiCache].iphu, isd, usefo, didSend)) return;
+        if (!myoutf(       bsts,  ests, didSend ? pack : packCache, socks[randiCache].iphu, isd, didSend)) return;
         if (didSend) memcpy(packCache, pack, SNPL);
 		 
     } while (isd && callret);

@@ -88,8 +88,8 @@ FILE *getLockedFile() {
     return lockf;
 }
 
-void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, bool *qck, char (*ip)[MAXIPL]) {
-	*isd = *usefo = false;
+void procArgs(int argc, char *argv[], bool *isd, bool *dosleep, bool *qck, char (*ip)[MAXIPL]) {
+	*isd = false;
 	*dosleep = *qck = true;
 	*ip[0] = '\0'; // need to do this now in case of return just below
 
@@ -97,7 +97,6 @@ void procArgs(int argc, char *argv[], bool *isd, bool *usefo, bool *dosleep, boo
 	int i;
 	for (i=1; i < argc; i++) {
 		if (strcmp("-d"		 , argv[i]) == 0) *isd		= true;
-		if (strcmp("-fifoout", argv[i]) == 0) *usefo    = true;
 		if (strcmp("-nosleep", argv[i]) == 0) *dosleep  = false;
 		if (strcmp("-noqck"  , argv[i]) == 0) *qck      = false;
 		if (strcmp("-ip"  , argv[i]) == 0 && i < argc + 1 && strlen(argv[i + 1]) < MAXIPL) strncpy((char *)ip, argv[i + 1], MAXIPL);
@@ -242,7 +241,7 @@ bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned lo
 }
 
 bool myoutf(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
-			const bool isd, const bool usefo, const bool newCall) {
+			const bool isd, const bool newCall) {
 
     static char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\n";
     
@@ -256,7 +255,7 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
 	printf("VERSION: %s\n", KWSNTPV);
 
 	FILE   *outf = NULL;
-	if (isd && usefo) {
+	if (isd) {
 		outf = fopen(KWSNTPDEXTGET, "w"); if (outf == NULL) { perror("output file (fifo) open fail"); return false; }
 		fprintf(outf, fmt, b, bsl, esl, e, ip);
 		fprintf(outf, "VERSION: %s %s", KWSNTPV, "\n");
