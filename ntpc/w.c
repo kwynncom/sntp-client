@@ -23,6 +23,7 @@ void myread() {
 	const int sz = 214; // based on size of output right now
 	char b[sz + 1];
 	rd = open(KWSNTPDEXTGET, O_RDONLY | O_NONBLOCK);
+	sleep(2);
 	read(rd, b, sz);
 	close(rd);
 	printf("%s\n", b);
