@@ -17,6 +17,7 @@
 
 #define KWSNTP_RETURN_FAIL -87;
 
+#include <stdbool.h>
 
 void calllog(const bool newCall, const unsigned long Uus, const bool doClose, FILE *genoutf);
 unsigned long nanotime();
