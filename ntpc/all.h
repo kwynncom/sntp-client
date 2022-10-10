@@ -1,4 +1,4 @@
-#define KWSNTPV "10/10 02:56 - notes done"
+#define KWSNTPV "10/10 18:50 - rc 1"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
@@ -14,6 +14,7 @@
 #define MINIPL  3 // ::1 is 3 chars
 
 #define TOLERANCENS M_BILLION
+#define KWSNTPMINOUTLEN 250
 
 #define KWSNTP_RETURN_FAIL -87;
 

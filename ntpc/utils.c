@@ -275,7 +275,13 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
 		 printf("%s", fss);
 		 if (outf != NULL) fprintf(outf, "%s", fss);
 	}
-	
+
+	// the filler is needed due to fixed / minimum output length being easier to deal with
+	const char *filler = "************************************************************************\n";
+	printf("%s", filler);
+	if (outf != NULL) fprintf(outf, "%s", filler);
+
+
 	if (outf != NULL) fclose(outf);
 
 	return true;
