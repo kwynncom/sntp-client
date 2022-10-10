@@ -11,7 +11,7 @@ class sntp_wrapper {
 	const lockf    = '/var/kwynn/mysd/lock';
 	const fifoo    = '/var/kwynn/mysd/poke';
 	const fifoi    = '/var/kwynn/mysd/get';
-	const versions = '10/09 03:02 rc2 - better error handling 2';
+	const versions = '10/10 02:42';
 	
 	private function checkStart() {
 		$isd = $this->isd;

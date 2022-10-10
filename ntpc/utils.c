@@ -1,4 +1,4 @@
-#include <stdlib.h> // exit()
+#include <stdlib.h> // rand(), abs(), etc.
 #include <stdio.h> // perror
 #include <sys/socket.h> 
 #include <arpa/inet.h> 
@@ -20,7 +20,7 @@ void mysleep() {
 }
 
 void cleanup(const struct sockInfo *socks, const FILE *lockf) {
-	for (int i=0; i < IPN; i++) close(socks[i].sock);
+	for (int i=0; i < IPN; i++) if (socks[i].sock >= 0) close(socks[i].sock);
 
     flock(fileno((FILE *)lockf), LOCK_UN);
     fclose((FILE *)lockf);
@@ -31,12 +31,17 @@ int popIPs(struct sockInfo *socks, const char *ipin, const bool isd);
 
 int popSocks(struct sockInfo *socks, const char *ipin, const bool isd) {
     
-    int ipnl = popIPs(socks, ipin, isd);
+	int ipnl = popIPs(socks, ipin, isd);
+	if (ipnl < 1) return KWSNTP_RETURN_FAIL;
     int i = 0;
 
-    for (i=0; i < ipnl; i++) socks[i].sock = getOutboundUDPSock(getAddr(socks[i].ip), 123);
+    for (i=0; i < ipnl; i++) {
+		if (!setAddr(socks[i].iphu, socks[i].ip46)) return KWSNTP_RETURN_FAIL;
+		socks[i].sock = getOutboundUDPSock(socks[i].ip46, 123);
+		if (socks[i].sock < 0) return KWSNTP_RETURN_FAIL; 
+	}
    
-	if (isd && ipnl == IPN) return -1;
+	if (isd && ipnl == IPN) return IPN;
 	else return 0;
 }
 
@@ -50,9 +55,9 @@ int popIPs(struct sockInfo *socks, const char *ipin, const bool isd) {
 	const int l = strlen(ipin);
 	if (l >= MINIPL) {
 
-		if (l > MAXIPL - 1) { printf("IP too long"); exit(2328); }
+		if (l > MAXIPL - 1) { fprintf(stderr, "IP too long"); return 0; }
 
-		strncpy(socks[0].ip, ipin, MAXIPL);
+		strncpy(socks[0].iphu, ipin, MAXIPL);
 		socks[0].alwaysQuota = false;
 		for (i=0; i < IPN; i++) if (strcmp(ipin, nista[i]) == 0) socks[0].alwaysQuota = true;
 
@@ -60,24 +65,25 @@ int popIPs(struct sockInfo *socks, const char *ipin, const bool isd) {
 	}
 	
 	for (i=0; i < IPN; i++) {
-		strncpy(socks[i].ip, nista[isd ? i : rand() % IPN], MAXIPL);
-		// strncpy(socks[i].ip, "127.0.0.1", MAXIPL);
+		strncpy(socks[i].iphu, nista[isd ? i : rand() % IPN], MAXIPL);
 		socks[i].alwaysQuota = true;		
 		if (!isd) return 1;
 	}
 
 	if (IPN == 7) return IPN;
 
-	printf("ERROR: expecting a specific IPN const / #define value");
-	exit(2154);
+	fprintf(stderr, "ERROR: expecting a specific IPN const / #define value");
+	return 0;
 }
 
 
 FILE *getLockedFile() {
     FILE   *lockf = fopen(KWSNTPDLOCKFILE, "w");
+	if (lockf == NULL) return NULL;
     if (flock(fileno(lockf), LOCK_EX | LOCK_NB) != 0) { 
+		fclose(lockf);
+		lockf = NULL;
 		perror("fifo output lock failure - another process running\n"); // correct errno by default
-		exit(28); 
 	}
     return lockf;
 }
@@ -104,25 +110,27 @@ void setOBPack(char *pack) {
     bzero (pack + 1,      47);
 }
 
-char *getAddr(const char *ips) {
+bool setAddr(const char *ipin, char *ipout) {
 
-	int argl;
-	argl = strlen(ips);
+	bzero(ipout, MAXIPL);
+
+	const int argl = strlen(ipin);
 	
-	if (argl < MINIPL || argl > MAXIPL) // "1.2.3.4" is 7 chars; IPv6 max 39 chars; ::1 is 3
-		{ fprintf(stderr, "bad IP length of %d\n", argl); exit(EXIT_FAILURE);}
+	if (argl < MINIPL || argl > MAXIPL - 1) // "1.2.3.4" is 7 chars; IPv6 max 39 chars; ::1 is 3
+		{ fprintf(stderr, "bad IP length of %d\n", argl); return false; }
 
-	if (strstr((char *)ips, ".") == NULL) return (char *)ips;
+	if (strstr((char *)ipin, ".") == NULL) {
+		strncpy(ipout, ipin, MAXIPL);
+		return true;
+	}
 
-	if (argl > 15) { fprintf(stderr, "bad IPv4 address - too long\n"); exit(EXIT_FAILURE);}
+	if (argl > 15) { fprintf(stderr, "bad IPv4 address - too long\n"); return false; }
 
-	const char *ip46p = "::FFFF:";
-	const int bsz = strlen(ip46p) + 15 + 1;
-	char *sbuf = (char *)malloc(bsz);
-	sbuf = strcat(sbuf, ip46p);
-	sbuf = strcat(sbuf, ips);
+	const char *ip46p  = "::FFFF:";
+	strcat(ipout, ip46p);
+	strcat(ipout, ipin);
 
-	return sbuf;
+	return true;
 }
 
 int getOutboundUDPSock(const char *addrStr, const int port) {
@@ -134,18 +142,19 @@ int getOutboundUDPSock(const char *addrStr, const int port) {
 
     addro.sin6_family = AF_INET6; 
 	if (inet_pton(AF_INET6, addrStr, &addro.sin6_addr) != 1) { 
-		fprintf(stderr, "bad IP address (pton): %s\n", addrStr); exit(EXIT_FAILURE); 
+		fprintf(stderr, "bad IP address (pton): %s\n", addrStr); 
+		return -1;
 	}
     addro.sin6_port = htons(port);
 
-    if ((sock = socket(AF_INET6, SOCK_DGRAM, 17)) < 0) { perror("socket creation failed"); exit(EXIT_FAILURE); }
+    if ((sock = socket(AF_INET6, SOCK_DGRAM, 17)) < 0) { perror("socket creation failed"); return -1; }
 
     struct timeval timeout;      
     timeout.tv_sec  = 1;
     timeout.tv_usec = 0;
 
-    if (setsockopt (sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0) { perror("setsockopt failed\n"); exit(2236); }
-    if (connect(sock, (struct sockaddr *) &addro, sizeof(addro)) != 0) {  perror("connection with the server failed...\n"); exit(EXIT_FAILURE); } 
+    if (setsockopt (sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0) { perror("setsockopt failed\n"); return -1;  }
+    if (connect(sock, (struct sockaddr *) &addro, sizeof(addro)) != 0) {  perror("connection with the server failed...\n"); return -1; } 
         
     return sock;
 }
@@ -154,7 +163,7 @@ int getOutboundUDPSock(const char *addrStr, const int port) {
 
 long double Ufl() {
     struct timespec sts;
-    if (clock_gettime(CLOCK_REALTIME, &sts) != 0) exit(8131);
+    clock_gettime(CLOCK_REALTIME, &sts);
     return (double) sts.tv_sec + ((double)sts.tv_nsec / (double)M_BILLION);
 }
 
@@ -232,7 +241,7 @@ bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned lo
 	return true;
 }
 
-void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
+bool myoutf(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
 			const bool isd, const bool usefo, const bool newCall) {
 
     static char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\n";
@@ -248,7 +257,7 @@ void output(const struct timespec bs, const struct timespec es, const char *pack
 
 	FILE   *outf = NULL;
 	if (isd && usefo) {
-		outf = fopen(KWSNTPDEXTGET, "w"); if (outf == NULL) { perror("output file (fifo) open fail"); exit(2322); }
+		outf = fopen(KWSNTPDEXTGET, "w"); if (outf == NULL) { perror("output file (fifo) open fail"); return false; }
 		fprintf(outf, fmt, b, bsl, esl, e, ip);
 		fprintf(outf, "VERSION: %s %s", KWSNTPV, "\n");
 	}
@@ -268,6 +277,8 @@ void output(const struct timespec bs, const struct timespec es, const char *pack
 	}
 	
 	if (outf != NULL) fclose(outf);
+
+	return true;
 }
 
 void calllog(const bool newCall, const unsigned long Uus, const bool doClose, FILE *genof ) {
@@ -277,7 +288,7 @@ void calllog(const bool newCall, const unsigned long Uus, const bool doClose, FI
 	int fpfr = 0;
 	char *fmt =  "%02d:%02d:%02d %02d/%02d/%04d %ld %s\n";
 
-	if (doClose && f != NULL) { fclose(f); return; }
+	if (doClose) { if (f != NULL) fclose(f); return; }
 	if (f == NULL) f = fopen(LOGFILE, "a");
 
 	time_t rawtime;

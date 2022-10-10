@@ -9,4 +9,8 @@ flows through the cleanup functions.
 My "bad write" doesn't have anyplace to go / report.  It should fail.  read() should not fail as easily because UDP packets get lost relatively 
 often.
 
+
+
+FIXED
+
 I should not malloc in getAddr.  The struct should have both a human IP and an ip4-6 common ip.  

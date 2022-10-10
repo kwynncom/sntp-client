@@ -4,20 +4,21 @@
 #include <time.h>   // timespec struct
 #include "all.h"
 
-void call10(const struct sockInfo *socks, const bool isd, const bool usefo, const bool qckb, const int rand1);
+void call10(const struct sockInfo *socks, const bool isd, const bool usefo, const bool qckb, const int randOne);
 
 void main(int argc, char *argv[]) {
 
     FILE   *lockf = getLockedFile();
+	if (lockf == NULL) { fprintf(stderr, "could not open and lock lockfile\n"); exit(150); /* safe to exit because nothing has been done */ }
     srand(time(NULL));
 	struct sockInfo socks[IPN];
 	bool isd, usefo, dosleep, qck;
 	char ip[MAXIPL];
-	int rand1;
+	int randOne;
 		
 	procArgs(argc, argv, &isd, &usefo, &dosleep, &qck, &ip);
-    rand1 = popSocks(socks, ip, isd);
-    call10(socks, isd, usefo, qck, rand1);
+    randOne = popSocks(socks, ip, isd);
+	if (randOne >= 0) call10(socks, isd, usefo, qck, randOne);
 	cleanup(socks, lockf);
-	if (!isd && dosleep) mysleep();
+	if (!isd && dosleep && randOne >= 0) mysleep();
 }

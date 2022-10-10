@@ -8,41 +8,47 @@
 
 #include "all.h"
 
-void callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack);
+bool callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack);
 
-void call10(const struct sockInfo *socks, const bool isd, const bool usefo, const bool qckb, const int rand1) {
+void call10(const struct sockInfo *socks, const bool isd, const bool usefo, const bool qckb, const int randOne) {
 
     unsigned char pack[SNPL], packCache[SNPL];
     struct timespec bsts;
     struct timespec ests;
-    int randi = rand1, randiCache = 0;
+    int randi = randOne, randiCache = 0;
 	bool didSend = false;
+	bool callret = true;
     
      do {
         setOBPack(pack);
 
-		if (isd && rand1 < 0) randi = rand() % IPN;
+		if (isd && randOne >= IPN) randi = rand() % IPN;
 
         if (isd && !onin()) return;
         if ((!(socks[randi].alwaysQuota || qckb)) || qckf()) {
  			randiCache = randi;
-            callServer(socks[randiCache].sock, &bsts, &ests, pack);
+            callret = callServer(socks[randiCache].sock, &bsts, &ests, pack);
 			didSend = true;
         } else didSend = false;
 
-        output(       bsts,  ests, didSend ? pack : packCache, socks[randiCache].ip, isd, usefo, didSend);
+        if (!myoutf(       bsts,  ests, didSend ? pack : packCache, socks[randiCache].iphu, isd, usefo, didSend)) return;
         if (didSend) memcpy(packCache, pack, SNPL);
 		 
-    } while (isd);
+    } while (isd && callret);
 }
 void decodeSNTPP(const char *p, unsigned long *sr, unsigned long *ss);
-void callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
+bool callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
 
 	if (sock <= 0) { printf("bad socket to SNTP call"); exit(2216); }
 
 	calllog(true, 0, false, NULL);
     clock_gettime(CLOCK_REALTIME, bs);
-    if (write(sock, pack, SNPL) != SNPL) fprintf(stderr, "bad write");
-    if (read (sock, pack, SNPL) != SNPL) fprintf(stderr, "bad read" );
+    if (write(sock, pack, SNPL) != SNPL) { fprintf(stderr, "bad write\n"); return false; }
+    if (read (sock, pack, SNPL) != SNPL) {
+		bzero(pack, SNPL);
+		fprintf(stderr, "bad read" );
+	}
     clock_gettime(CLOCK_REALTIME, es);
+
+	return true;
 }

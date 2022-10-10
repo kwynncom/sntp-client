@@ -1,4 +1,4 @@
-#define KWSNTPV "10/10 01:02 - stderr"
+#define KWSNTPV "10/10 02:36 - notes almost done"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
@@ -10,21 +10,24 @@
 #define M_BILLION 1000000000
 #define M_MILLION 1000000
 #define SNPL   48 // SNTP packet length
-#define MAXIPL 40 // full IPv6 addr
+#define MAXIPL 40 // full IPv6 addr plus \0
 #define MINIPL  3 // ::1 is 3 chars
 
 #define TOLERANCENS M_BILLION
 
+#define KWSNTP_RETURN_FAIL -87;
+
 
 void calllog(const bool newCall, const unsigned long Uus, const bool doClose, FILE *genoutf);
 unsigned long nanotime();
-char *getAddr(const char *ips);
+bool setAddr(const char *ipin, char *ipout);
 int getOutboundUDPSock(const char *addrStr, const int port);
 void setOBPack(char *pack);
 long double Ufl();
 
 struct sockInfo {
-    char ip[MAXIPL];
+    char iphu[MAXIPL];
+	char ip46[MAXIPL];
     int  sock;
 	bool alwaysQuota;
 };
@@ -37,7 +40,7 @@ void mysleep();
 
 bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned long c, const unsigned long d);
 
-void output(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
+bool myoutf(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
 			const bool isd, const bool usefo, const bool didSend);
 
 bool qckf();
