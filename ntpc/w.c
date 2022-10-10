@@ -1,12 +1,8 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <signal.h>
-#include <unistd.h>
+#include <unistd.h> // read
+#include <string.h> // strstr
+#include <stdlib.h> // struct timespec
+#include <fcntl.h> // open
 #include "all.h"
 
 void mywrite() {
@@ -21,13 +17,14 @@ void mywrite() {
 void myread() {
 	int rd;
 	const int sz = 214; // based on size of output right now
-	char b[sz + 1];
-	rd = open(KWSNTPDEXTGET, O_RDONLY | O_NONBLOCK);
+	char    b[sz + 1];
+	bzero(b,  sz + 1);
 	
-	int i=0;
-	const int  stepsn  =  7;
-	const int steps[7]  = {2, 5, 5, 40, 50, 200, 700};
+	const int stepsn = 14;  
+	const int steps   [14]  = {  2, 3, 2, 2, 3, 40, 20, 40, 50, 50, 100, 100, 100, 100};
 
+	rd = open(KWSNTPDEXTGET, O_RDONLY | O_NONBLOCK);
+	int i=0;
 
 	for (i=0; i < stepsn; i++) {
 		usleep(steps[i] * 1000);
@@ -37,7 +34,6 @@ void myread() {
 	}
 	close(rd);
 	printf("%s\n", b);
-	printf("%d\n", i);
 }
 
 void main(void) { // I will need to account for the exit "x" rather than non-x
