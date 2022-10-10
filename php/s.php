@@ -11,7 +11,7 @@ class sntp_wrapper {
 	const lockf    = '/var/kwynn/mysd/lock';
 	const fifoo    = '/var/kwynn/mysd/poke';
 	const fifoi    = '/var/kwynn/mysd/get';
-	const versions = '10/10 03:49 - test lock again';
+	const versions = '10/10 04:35 - fifo nohup echo - one way';
 	
 	private function checkStart() {
 		$isd = $this->isd;
@@ -25,7 +25,6 @@ class sntp_wrapper {
 
 		if ($isd && $lok) {
 			kwnohup('sntp -d -fifoout -nosleep');
-			usleep(100000);
 		}
 		if ($isd) $plock->unlock();
 		if (!$lok) $this->isd = true;
@@ -54,19 +53,30 @@ class sntp_wrapper {
 	}
 	
 	private function fifoout($tos) {
-		if ($this->iGetLock()) die('should not get lock before fopen fifoout' . "\n");			
-		$h = fopen(self::fifoo, 'w');
-		fwrite($h, $tos);
-		fclose($h);
+		$pid = pcntl_fork();
+		if ($pid == 0) {
+			file_put_contents(self::fifoo, $tos);
+			exit(0);
+		}
+		
 	}
 	
 	private function fifoin() {
-		if ($this->iGetLock()) die('should not get lock before fopen fifoout' . "\n");
-		$h = fopen(self::fifoi, 'r');
-		$s = '';
-		while($l = fgets($h)) $s .= $l;
-		fclose($h);
-		return $s;
+		$pid = pcntl_fork();
+		if ($pid == 0) return file_get_contents(self::fifoi);
+		else { 
+			$status;
+			$i = 0;
+			while ($i++ < 10) {
+			
+				usleep(100000);
+				pcntl_wait($status, WNOHANG);
+				if (pcntl_wifexited($status)) break;
+				
+			}
+
+			exit(0);
+		}
 		
 	}
 	
