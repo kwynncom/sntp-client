@@ -12,7 +12,7 @@ class sntp_wrapper {
 	const lockf    = '/var/kwynn/mysd/lock';
 	const fifoo    = '/var/kwynn/mysd/poke';
 	const fifoi    = '/var/kwynn/mysd/get';
-	const versions = '10/10 19:28 - Try again - really using new C wrapper'; 
+	const versions = '10/10 19:49 - new sanity version'; 
 	
 	public function __destruct() {
 		if (kwifs($this, 'plock')) $this->plock->unlock();	
@@ -128,6 +128,7 @@ class sntp_wrapper {
 			if ($this->sane)
 				 echo('Results **OK**' . "\n");
 			else echo("sanity failures\n");
+			echo('Sanity VERSION: ' . sntpSanity::ssVersion . "\n");
 		}		
 
 		$this->jsonf();
