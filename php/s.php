@@ -77,7 +77,6 @@ class sntp_wrapper {
 				case '-d'    : $this->isd  = true; break;
 				case  'x'	 :
 				case '-x'    : $this->doclose = true;
-					
 			}
 		}
 	}
