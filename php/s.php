@@ -8,11 +8,8 @@ class sntp_wrapper {
 	const cmdBase = 'sntp -nosleep'; // sleeping in PHP.  If I sleep in C, then the PHP sanity check fails, and I don't get my output for 4 seconds.
 	const cmdrunner  = 'sntpr';
 	const maxNISTS = 4;
-	const tchars   = 79;
-	const lockf    = '/var/kwynn/mysd/lock';
-	const fifoo    = '/var/kwynn/mysd/poke';
-	const fifoi    = '/var/kwynn/mysd/get';
-	const versions = '10/10 19:49 - new sanity version'; 
+	const lockf    = '/var/kwynn/mysd/lockC'; // must match C
+	const versions = '10/17 00:33 - removing unused stuff 2'; 
 	
 	public function __destruct() {
 		if (kwifs($this, 'plock')) $this->plock->unlock();	

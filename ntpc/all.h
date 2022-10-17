@@ -1,9 +1,9 @@
-#define KWSNTPV "10/10 19:18 - usefo === isd"
+#define KWSNTPV "10/17 00:23 - moving log and lock"
 
-#define KWSNTPDLOCKFILE "/var/kwynn/mysd/lock"
+#define KWSNTPDLOCKFILE "/var/kwynn/mysd/lockC" // must match PHP
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
 #define KWSNTPDPOKE		"/var/kwynn/mysd/poke"
-#define LOGFILE			"/tmp/snl.txt"
+#define LOGFILE			"/var/kwynn/mysd/logC.txt"
 #define NISTMaxS 4.0
 #define IPN 7 // 7 NIST server IPs by default
 
