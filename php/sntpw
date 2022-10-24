@@ -1,2 +1,2 @@
-php /home/k/sm20/ntpc/php/s.php "$@"
-# 2022/10/24 04:08
+php /path/ntpc/php/s.php "$@"
+# 2022/10/24 04:17
