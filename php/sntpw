@@ -1,0 +1,2 @@
+php /home/k/sm20/ntpc/php/s.php "$@"
+echo sntpw script 2022/10/24 04:03

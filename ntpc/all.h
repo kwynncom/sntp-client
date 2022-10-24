@@ -1,4 +1,4 @@
-#define KWSNTPV "10/17 00:23 - moving log and lock"
+#define KWSNTPV "10/24 03:31 - rename binary to sntpkw"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lockC" // must match PHP
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
