@@ -4,7 +4,7 @@
 #include <stdlib.h> // struct timespec
 #include <fcntl.h> // open
 #include "all.h"
-#define crwversion "10/10 19:48 - *** separator"
+#define crwversion "2023/01/20 02:57 - one char"
 
 
 bool shouldCloseF(const int argc, const char *argv[]) {
@@ -46,9 +46,9 @@ void myread() {
 	read(rd, igb, sz); // might need to clear any unused output
 
 	close(rd);
-	printf("%s\n", b);
+	printf("%s", b);
 	printf("%s %s\n", "C FIFO runner / wrapper VERSION: ", crwversion);
-	printf("******************\n");
+	// printf("******************\n");
 }
 
 void main(const int argc, const char *argv[]) { // I will need to account for the exit "x" rather than non-x

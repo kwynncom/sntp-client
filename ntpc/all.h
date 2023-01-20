@@ -4,6 +4,8 @@
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
 #define KWSNTPDPOKE		"/var/kwynn/mysd/poke"
 #define LOGFILE			"/var/kwynn/mysd/logC.txt"
+#define ALLRESULTSFILE  "/var/kwynn/mysd/fullLog.txt"
+
 #define NISTMaxS 4.0
 #define IPN 7 // 7 NIST server IPs by default
 
@@ -20,7 +22,7 @@
 #define MINIPL  3 // ::1 is 3 chars
 
 #define TOLERANCENS M_BILLION
-#define KWSNTPMINOUTLEN 250
+#define KWSNTPMINOUTLEN 2
 
 #define KWSNTP_RETURN_FAIL -87;
 

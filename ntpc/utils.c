@@ -20,14 +20,14 @@ void mysleep() {
 	sleep(sl);
 }
 
-void closeFIFO();
+void closeOutputFiles();
 void cleanup(const struct sockInfo *socks, const FILE *lockf) {
 	for (int i=0; i < IPN; i++) if (socks[i].sock >= 0) close(socks[i].sock);
 
     flock(fileno((FILE *)lockf), LOCK_UN);
     fclose((FILE *)lockf);
 	calllog(false, 0, true, NULL);
-	closeFIFO();
+	closeOutputFiles();
 }
 
 int popIPs(struct sockInfo *socks, const char *ipin, const bool isd);
@@ -269,10 +269,12 @@ unsigned int decSNTPStratumRefID(const unsigned char *p, char ri[REFIDSZ]) {
 }
 
 FILE *kwsnfifoptrGlob = NULL;
+FILE *kwsnLogFPGlob	  = NULL;
 
-void closeFIFO() {
+void closeOutputFiles() {
 	// myoutf(NULL, NULL, NULL, NULL, NULL, false, true);
 	if (kwsnfifoptrGlob != NULL) fclose(kwsnfifoptrGlob);
+	if (kwsnLogFPGlob   != NULL) fclose(kwsnLogFPGlob);
 }
 
 bool myoutf(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
@@ -294,10 +296,23 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
 	myout20f(ob10, b, bsl, esl, e, ip, stratum, refid, isd, ck);
 
 	static FILE *outf = NULL;
+
+// fifo IS conditional on isd, not the new file
+	if (kwsnLogFPGlob == NULL) {
+		outf = kwsnLogFPGlob = fopen(ALLRESULTSFILE, "a"); 
+		if (kwsnLogFPGlob == NULL) { perror("output full log file open fail"); return false; }
+	}
+
 	if (isd && kwsnfifoptrGlob == NULL) {
-		outf = kwsnfifoptrGlob = fopen(KWSNTPDEXTGET, "w"); 
+		kwsnfifoptrGlob = fopen(KWSNTPDEXTGET, "w"); 
 		if (kwsnfifoptrGlob == NULL) { perror("output file (fifo) open fail"); return false; }
 	}
+
+	const char *begs = "*** BEGIN ***\n";
+
+	if (outf != NULL) 
+		fprintf(outf, "%s", begs);
+		printf (	  "%s", begs); // unconditional
 
 	if (outf != NULL) 
 		fprintf(outf, "%s", ob10);
@@ -305,15 +320,15 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
 
 	calllog(false, b, false, outf);
 
-	// I use the filler b/c fixed / minimum output length is easier to deal with
-	const char *filler = "************************************************************************\n";
-
-	if (outf != NULL) 
-		fprintf(outf, "%s", filler);
-		printf (	  "%s", filler); // unconditional
 
 	if (outf) fflush(outf);
 			  fflush(stdout); // unc
+
+	if (kwsnfifoptrGlob != NULL) {
+		// putc('a', kwsnfifoptrGlob);
+		fprintf(kwsnfifoptrGlob, "a\n");
+		fflush(kwsnfifoptrGlob);
+	}
 
 	return true;
 }
