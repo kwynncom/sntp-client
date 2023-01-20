@@ -12,6 +12,7 @@
 #include <errno.h>
 
 #include "all.h"
+#include "out.h"
 
 void mysleep() {
 	int sl = (int)round(NISTMaxS);
@@ -246,14 +247,10 @@ unsigned long nanotime() {
 
 bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned long c, const unsigned long d) {
 
-// does not need to be tight b/c I/O is going on, and I might be debugging; just a paranoid check on telling time
-	const unsigned long ftckt = (unsigned long)M_BILLION * (unsigned long)30; 
-
 	if (b > c) return false;
 	if (a > d) return false;
 	if (d - a > TOLERANCENS) return false;
 	if ((abs(d - c) + abs(b - a)) > TOLERANCENS) return false;
-	if (nanotime() - a > ftckt) return false;
 	return true;
 }
 
@@ -277,6 +274,8 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
     unsigned long bsl, esl;
     
     decSNTPPTime(pack, &bsl, &esl);
+	const bool ck = sanityCheck(b, bsl, esl, e);
+
 	char refid[REFIDSZ];
 	const int stratum = decSNTPStratumRefID(pack, refid);
 
@@ -296,7 +295,6 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
 
 	calllog(false, b, false, outf);
 
-	const bool ck = sanityCheck(b, bsl, esl, e);
 	if (ck) {
 			const char *pss = "**OK** - C - passes sanity check\n";
 			printf("%s", pss);
@@ -314,7 +312,10 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
 	if (outf != NULL) fprintf(outf, "%s", filler);
 
 
-	if (outf != NULL) fclose(outf);
+	if (outf != NULL) {
+		fflush(outf);
+		fclose(outf);
+	}
 
 	return true;
 }
@@ -324,28 +325,28 @@ void calllog(const bool newCall, const unsigned long Uus, const bool doClose, FI
 	static unsigned long prevts = 1;
 
 	int fpfr = 0;
-	char *fmt =  "%02d:%02d:%02d %02d/%02d/%04d %ld %s\n";
+
 
 	if (doClose) { if (f != NULL) fclose(f); return; }
 	if (f == NULL) f = fopen(LOGFILE, "a");
 
-	time_t rawtime;
-	if (!Uus) rawtime = time(NULL);
-	else      rawtime = (unsigned long)floorl(Uus / M_BILLION);
-	struct tm *t = localtime(&rawtime);
+	char hubuf[hubufsz];
+	hutime(Uus, hubuf);
 
 	char *cs = "(unk - should not happen)";
 	if (Uus == prevts && !newCall) cs = "(cached / quota fail)";
 	else if (newCall) cs = "";
 	else cs = "(after call with ns)";
 	
+	char *fmt =  "%s %s\n";
+
 	if (newCall) {
-		fprintf(f, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900,	   rawtime, cs);	
+		fprintf(f, fmt, hubuf, cs);	
 		fflush(f); // note that you cannot write out fifo or stdout because I assume the first 4 lines are ns times
 	} else {
-		printf(        fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900, Uus, cs);
+		printf(    fmt, hubuf, cs);
 		fflush(stdout);
-		if (genof != NULL) fprintf(genof, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900,	Uus, cs);
+		if (genof != NULL) fprintf(genof, fmt, hubuf, Uus, cs);
 		fflush(genof);
 		prevts = Uus;
 

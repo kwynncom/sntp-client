@@ -1,4 +1,4 @@
-#define KWSNTPV "2023/01/19 21:52 - relaxed final time check, typecast version"
+#define KWSNTPV "2023/01/19 23:28 - moved sanity ck"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lockC" // must match PHP
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
