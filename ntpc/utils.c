@@ -279,8 +279,12 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
 	char refid[REFIDSZ];
 	const int stratum = decSNTPStratumRefID(pack, refid);
 
-    static char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\nStratum: %d\nRefID: %s\n";
-    printf (fmt, b, bsl, esl, e, ip, stratum, refid);
+	char ob10[obuffullsz];
+	myout20f(b, bsl, esl, e, ip, stratum, refid, isd, ob10);
+
+	printf("%s", ob10);
+
+    const char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\nStratum: %d\nRefID: %s\n";
 
 
 
