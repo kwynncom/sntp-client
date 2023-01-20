@@ -1,4 +1,4 @@
-#define KWSNTPV "10/24 03:31 - rename binary to sntpkw"
+#define KWSNTPV "2023/01/19 21:11 - out format FIFO consistent"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lockC" // must match PHP
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
@@ -9,7 +9,13 @@
 
 #define M_BILLION 1000000000
 #define M_MILLION 1000000
+
 #define SNPL   48 // SNTP packet length
+#define SNTPREFIDSTART 12
+#define REFIDSZ 5 // including \0
+#define KWSNBR "KWBR"
+#define KWSNBW "KWBW"
+
 #define MAXIPL 40 // full IPv6 addr plus \0
 #define MINIPL  3 // ::1 is 3 chars
 

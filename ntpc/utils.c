@@ -173,27 +173,8 @@ long double Ufl() {
     return (double) sts.tv_sec + ((double)sts.tv_nsec / (double)M_BILLION);
 }
 
-// stratum is bits 8 - 15, or the 2nd byte
-// The first 4 bits are the stratum proper; below indicates the number represented by the 4 bits, not bit indexes
-// bits numbered in big-endian fashion from 0 starting at the left or most significant end
-// The x86 processors use little-endian byte ordering
-/*       Stratum  Meaning
-      ----------------------------------------------
-      0        kiss-o'-death message (see below)
-      1        primary reference (e.g., synchronized by radio clock)
-      2-15     secondary reference (synchronized by NTP or SNTP) */
 
-void decodeSNTPResponseHeader(const unsigned char *p) {
-	unsigned int strati = (unsigned int)p[1];
-	char display[3];
-	sprintf(display, "%02X", strati);
-	return;
-	
-
-}
-
-
-void decodeSNTPP(const unsigned char *p, unsigned long *sr, unsigned long *ss) {
+void decSNTPPTime(const unsigned char *p, unsigned long *sr, unsigned long *ss) {
 
     const unsigned int UminusNTP = 2208988800;
     const unsigned int full32    = 4294967295; 
@@ -226,7 +207,7 @@ void decodeSNTPP(const unsigned char *p, unsigned long *sr, unsigned long *ss) {
         const int ignore = 1;
     } // loop
 
-	decodeSNTPResponseHeader(p);
+	// decodeSNTPResponseHeader(p);
 } // func
 
 
@@ -272,24 +253,40 @@ bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned lo
 	return true;
 }
 
+void setRefIDIE() {
+
+}
+
+// returns stratum ; SNTP_spect.txt has format / byte / bit details
+unsigned int decSNTPStratumRefID(const unsigned char *p, char ri[REFIDSZ]) {
+	const unsigned int stratum = (unsigned int)p[1];
+	bzero(ri, REFIDSZ);
+	for (int i=0; i < REFIDSZ - 1; i++) ri[i] = p[i+SNTPREFIDSTART];
+	return stratum;
+}
+
 bool myoutf(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
 			const bool isd, const bool newCall) {
 
-    static char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\n";
-    
     const unsigned long b = bs.tv_sec * M_BILLION + bs.tv_nsec;
     const unsigned long e = es.tv_sec * M_BILLION + es.tv_nsec;  
     unsigned long bsl, esl;
     
-    decodeSNTPP(pack, &bsl, &esl);
+    decSNTPPTime(pack, &bsl, &esl);
+	char refid[REFIDSZ];
+	const int stratum = decSNTPStratumRefID(pack, refid);
 
-    printf (fmt, b, bsl, esl, e, ip);
+    static char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\nStratum: %d\nRefID: %s\n";
+    printf (fmt, b, bsl, esl, e, ip, stratum, refid);
+
+
+
 	printf("VERSION: %s\n", KWSNTPV);
 
 	FILE   *outf = NULL;
 	if (isd) {
 		outf = fopen(KWSNTPDEXTGET, "w"); if (outf == NULL) { perror("output file (fifo) open fail"); return false; }
-		fprintf(outf, fmt, b, bsl, esl, e, ip);
+		fprintf(outf, fmt, b, bsl, esl, e, ip, stratum, refid);
 		fprintf(outf, "VERSION: %s %s", KWSNTPV, "\n");
 	}
 

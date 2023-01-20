@@ -1,0 +1,11 @@
+// stratum is bits 8 - 15, or the 2nd byte
+// The first 4 bits are the stratum proper; below indicates the number represented by the 4 bits, not bit indexes
+// bits numbered in big-endian fashion from 0 starting at the left or most significant end
+// The x86 processors use little-endian byte ordering
+/*       Stratum  Meaning
+      ----------------------------------------------
+      0        kiss-o'-death message (see below)
+      1        primary reference (e.g., synchronized by radio clock)
+      2-15     secondary reference (synchronized by NTP or SNTP) */
+
+// the 4th 32 bit field is the "Reference Identifier" of ASCII chars

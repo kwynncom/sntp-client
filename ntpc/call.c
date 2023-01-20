@@ -36,18 +36,19 @@ void call10(const struct sockInfo *socks, const bool isd, const bool qckb, const
 		 
     } while (isd && callret);
 }
-void decodeSNTPP(const char *p, unsigned long *sr, unsigned long *ss);
+
+void kwSetPackIE(char *pack, const char *msg) { 
+	strncpy(pack + SNTPREFIDSTART, msg, REFIDSZ - 1); 
+}
+
 bool callServer(const int sock, struct timespec *bs, struct timespec *es, char *pack) {
 
 	if (sock <= 0) { fprintf(stderr, "bad socket to SNTP call"); return false; }
 
 	calllog(true, 0, false, NULL);
     clock_gettime(CLOCK_REALTIME, bs);
-    if (write(sock, pack, SNPL) != SNPL) { fprintf(stderr, "bad write\n"); return false; }
-    if (read (sock, pack, SNPL) != SNPL) {
-		bzero(pack, SNPL);
-		fprintf(stderr, "bad read" );
-	}
+    if (write(sock, pack, SNPL) != SNPL) { fprintf(stderr, "bad write\n"); kwSetPackIE(pack, KWSNBW); return false; }
+    if (read (sock, pack, SNPL) != SNPL) { kwSetPackIE(pack, KWSNBR); /* do not return false because it will break the main call loop above */	}
     clock_gettime(CLOCK_REALTIME, es);
 
 	return true;
