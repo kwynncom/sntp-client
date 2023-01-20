@@ -286,15 +286,10 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
 
     const char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\nStratum: %d\nRefID: %s\n";
 
-
-
-	printf("VERSION: %s\n", KWSNTPV);
-
 	FILE   *outf = NULL;
 	if (isd) {
 		outf = fopen(KWSNTPDEXTGET, "w"); if (outf == NULL) { perror("output file (fifo) open fail"); return false; }
-		fprintf(outf, fmt, b, bsl, esl, e, ip, stratum, refid);
-		fprintf(outf, "VERSION: %s %s", KWSNTPV, "\n");
+		fprintf(outf, "%s", ob10);
 	}
 
 	calllog(false, b, false, outf);
@@ -350,7 +345,7 @@ void calllog(const bool newCall, const unsigned long Uus, const bool doClose, FI
 	} else {
 		printf(    fmt, hubuf, cs);
 		fflush(stdout);
-		if (genof != NULL) fprintf(genof, fmt, hubuf, Uus, cs);
+		if (genof != NULL) fprintf(genof, fmt, hubuf, cs);
 		fflush(genof);
 		prevts = Uus;
 

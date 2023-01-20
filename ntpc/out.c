@@ -17,8 +17,8 @@ void myout20f(	const unsigned long a1,
 				const bool isd,
 				char *outb
 ) {
-    const char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\nStratum: %d\nRefID: %s\n";
-    sprintf (outb, fmt, a1, a2, a3, a4, ip, stratum, refid);
+    const char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\nStratum: %d\nRefID: %s\nVERSION: %s\n";
+    sprintf (outb, fmt, a1, a2, a3, a4, ip, stratum, refid, KWSNTPV );
 }
 
 void hutime(const unsigned long Uus, char *obuf) {
@@ -27,9 +27,6 @@ void hutime(const unsigned long Uus, char *obuf) {
 	else      rawtime = (unsigned long)floorl(Uus / M_BILLION);
 	struct tm *t = localtime(&rawtime);
 
-	const char *fmt =  "%02d:%02d:%02d %02d/%02d/%04d %ld"; // \nVERSION: %s\n";
-	// printf("VERSION: %s\n", KWSNTPV);
-
-	
-	sprintf(obuf, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900, rawtime /*, KWSNTPV */);
+	const char *fmt =  "%02d:%02d:%02d %02d/%02d/%04d %ld";
+	sprintf(obuf, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900, rawtime );
 }
