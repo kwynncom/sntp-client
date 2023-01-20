@@ -22,18 +22,13 @@ void myout20f(
 
 ) {
 
-	// I use the filler b/c fixed / minimum output length is easier to deal with
-	const char *filler = "************************************************************************";
-
-
-
 	char *sd;
 	if (psck) sd =  "**OK** - C - passes sanity check";
 	else	  sd = "fails C sanity check";
 
 
-    const char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\nStratum: %d\nRefID: %s\nVERSION: %s\n%s\n%s\n";
-    sprintf (outb, fmt, a1, a2, a3, a4, ip, stratum, refid, KWSNTPV, sd, filler );
+    const char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\nStratum: %d\nRefID: %s\nVERSION: %s\n%s\n";
+    sprintf (outb, fmt, a1, a2, a3, a4, ip, stratum, refid, KWSNTPV, sd);
 }
 
 void hutime(const unsigned long Uus, char *obuf) {
@@ -43,5 +38,5 @@ void hutime(const unsigned long Uus, char *obuf) {
 	struct tm *t = localtime(&rawtime);
 
 	const char *fmt =  "%02d:%02d:%02d %02d/%02d/%04d %ld";
-	sprintf(obuf, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900, rawtime );
+	sprintf(obuf, fmt, t->tm_hour, t->tm_min, t->tm_sec, t->tm_mon + 1, t->tm_mday, t->tm_year + 1900, Uus ? Uus : rawtime );
 }

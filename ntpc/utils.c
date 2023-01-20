@@ -20,12 +20,14 @@ void mysleep() {
 	sleep(sl);
 }
 
+void closeFIFO();
 void cleanup(const struct sockInfo *socks, const FILE *lockf) {
 	for (int i=0; i < IPN; i++) if (socks[i].sock >= 0) close(socks[i].sock);
 
     flock(fileno((FILE *)lockf), LOCK_UN);
     fclose((FILE *)lockf);
 	calllog(false, 0, true, NULL);
+	closeFIFO();
 }
 
 int popIPs(struct sockInfo *socks, const char *ipin, const bool isd);
@@ -251,6 +253,7 @@ bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned lo
 	if (a > d) return false;
 	if (d - a > TOLERANCENS) return false;
 	if ((abs(d - c) + abs(b - a)) > TOLERANCENS) return false;
+	if (nanotime() - a > TOLERANCENS) return false;
 	return true;
 }
 
@@ -265,18 +268,18 @@ unsigned int decSNTPStratumRefID(const unsigned char *p, char ri[REFIDSZ]) {
 	return stratum;
 }
 
+FILE *kwsnfifoptrGlob = NULL;
+
+void closeFIFO() {
+	// myoutf(NULL, NULL, NULL, NULL, NULL, false, true);
+	if (kwsnfifoptrGlob != NULL) fclose(kwsnfifoptrGlob);
+}
+
 bool myoutf(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
 			const bool isd, const bool newCall) {
 
     const unsigned long b = bs.tv_sec * M_BILLION + bs.tv_nsec;
     const unsigned long e = es.tv_sec * M_BILLION + es.tv_nsec;  
-
-	static FILE   *outf = NULL;
-	if (isd && outf == NULL) {
-		outf = fopen(KWSNTPDEXTGET, "w"); 
-		if (outf == NULL) { perror("output file (fifo) open fail"); return false; }
-	}
-	calllog(false, b, false, outf);
 
     unsigned long bsl, esl;
     
@@ -290,15 +293,27 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
 	static char ob10[obuffullsz];
 	myout20f(ob10, b, bsl, esl, e, ip, stratum, refid, isd, ck);
 
+	static FILE *outf = NULL;
+	if (isd && kwsnfifoptrGlob == NULL) {
+		outf = kwsnfifoptrGlob = fopen(KWSNTPDEXTGET, "w"); 
+		if (kwsnfifoptrGlob == NULL) { perror("output file (fifo) open fail"); return false; }
+	}
 
 	if (outf != NULL) 
 		fprintf(outf, "%s", ob10);
 		printf (	  "%s", ob10); // unconditional
 
-	if (outf != NULL) {
-		fflush(outf);
-		fclose(outf);
-	}
+	calllog(false, b, false, outf);
+
+	// I use the filler b/c fixed / minimum output length is easier to deal with
+	const char *filler = "************************************************************************\n";
+
+	if (outf != NULL) 
+		fprintf(outf, "%s", filler);
+		printf (	  "%s", filler); // unconditional
+
+	if (outf) fflush(outf);
+			  fflush(stdout); // unc
 
 	return true;
 }
@@ -308,7 +323,6 @@ void calllog(const bool newCall, const unsigned long Uus, const bool doClose, FI
 	static unsigned long prevts = 1;
 
 	int fpfr = 0;
-
 
 	if (doClose) { if (f != NULL) fclose(f); return; }
 	if (f == NULL) f = fopen(LOGFILE, "a");
