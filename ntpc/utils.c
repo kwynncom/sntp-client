@@ -245,11 +245,15 @@ unsigned long nanotime() {
 }
 
 bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned long c, const unsigned long d) {
+
+// does not need to be tight b/c I/O is going on, and I might be debugging; just a paranoid check on telling time
+	const unsigned long ftckt = (unsigned long)M_BILLION * (unsigned long)30; 
+
 	if (b > c) return false;
 	if (a > d) return false;
 	if (d - a > TOLERANCENS) return false;
 	if ((abs(d - c) + abs(b - a)) > TOLERANCENS) return false;
-	if (nanotime() - a > TOLERANCENS) return false;
+	if (nanotime() - a > ftckt) return false;
 	return true;
 }
 
