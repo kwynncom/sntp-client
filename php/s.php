@@ -10,7 +10,10 @@ class sntp_wrapper {
 	const cmdrunner = 'sntpr';
 	const maxNISTS = 4;
 	const lockf    = '/var/kwynn/mysd/lockC'; // must match C
-	const versions = '10/24 04:01 - cmdBB'; 
+	const flf	   = '/var/kwynn/mysd/fullLog.txt'; // must match C
+	const tailn    = 25;
+	const starts   = '*** BEGIN ***';
+	const versions = '2023/01/20 03:20 - pull from log; working with shell_exec'; 
 	
 	public function __destruct() {
 		if (kwifs($this, 'plock')) $this->plock->unlock();	
@@ -110,12 +113,26 @@ class sntp_wrapper {
 		return $t;
 	}
 	
-	private function doout(string $t, string $from) {
+	private function getFromFullLog() {
+		$t = shell_exec('tail -n ' . self::tailn . ' ' . self::flf);
+		$a = explode("\n", $t);
+		for ($i = count($a) - 1; $i >= 0; $i--) {
+			if (strpos($a[$i], self::starts) !== false) { 
+				return implode("\n", array_slice($a, $i + 1));
+			}
+		}
+		return '';
+	}
+	
+	private function doout(string $ignore, string $from) {
+		
+		$t = $this->getFromFullLog();
+		
+		if (!$this->dojson) echo($t);
 				
 		$a = $this->popValid($t);
 
 		if (!$this->dojson) { 
-			echo($t);
 			$min = min($a);
 			foreach($a as $n) echo(number_format($n - $min) . "\n");
 			echo(number_format(self::SNTPOffset($a)) . " = offset\n");
