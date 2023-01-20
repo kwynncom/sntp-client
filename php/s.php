@@ -28,6 +28,7 @@ class sntp_wrapper {
 
 		if ($isd && $lok) {
 			kwnohup(self::cmdNohup);
+			// usleep(200000);
 		}
 		if ($isd) $this->plock->unlock();
 		if (!$lok) $this->isd = true;

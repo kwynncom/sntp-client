@@ -105,8 +105,15 @@ void procArgs(int argc, char *argv[], bool *isd, bool *dosleep, bool *qck, char 
 }
 
 void setOBPack(char *pack) {
-    memcpy(pack    , "#",  1); // SNTP packet header - see readme
-    bzero (pack + 1,      47);
+	// bit-in-packet index						   01234567
+	//											   LIvvvmmm
+	// SNTP packet header - "#" ASCII === 0x23 === 00100011
+	// the very next bit begins the "stratum" field, which is also used for the KoD (kiss of death) indication
+	// https://datatracker.ietf.org/doc/rfc4330/ ; Simple Network Time Protocol (SNTP) Version 4 for IPv4, IPv6 and OSI ; RFC 4330
+	// 00 === LI === leap second indicator; 100 === 4 or SNTP v4.  011 === 3 "mode" 3 means I am an SNTP client
+
+    memcpy(pack    , "#",  1); // set first byte of header, as just above 
+    bzero (pack + 1,      47); // nothing else is needed for my purposes, so 0 fill.  0 fill works, from long experience.
 }
 
 bool setAddr(const char *ipin, char *ipout) {
@@ -166,6 +173,26 @@ long double Ufl() {
     return (double) sts.tv_sec + ((double)sts.tv_nsec / (double)M_BILLION);
 }
 
+// stratum is bits 8 - 15, or the 2nd byte
+// The first 4 bits are the stratum proper; below indicates the number represented by the 4 bits, not bit indexes
+// bits numbered in big-endian fashion from 0 starting at the left or most significant end
+// The x86 processors use little-endian byte ordering
+/*       Stratum  Meaning
+      ----------------------------------------------
+      0        kiss-o'-death message (see below)
+      1        primary reference (e.g., synchronized by radio clock)
+      2-15     secondary reference (synchronized by NTP or SNTP) */
+
+void decodeSNTPResponseHeader(const unsigned char *p) {
+	unsigned int strati = (unsigned int)p[1];
+	char display[3];
+	sprintf(display, "%02X", strati);
+	return;
+	
+
+}
+
+
 void decodeSNTPP(const unsigned char *p, unsigned long *sr, unsigned long *ss) {
 
     const unsigned int UminusNTP = 2208988800;
@@ -198,7 +225,12 @@ void decodeSNTPP(const unsigned char *p, unsigned long *sr, unsigned long *ss) {
         
         const int ignore = 1;
     } // loop
+
+	decodeSNTPResponseHeader(p);
 } // func
+
+
+
 
 bool onin() {
     FILE *fp = fopen(KWSNTPDPOKE, "r");
