@@ -261,7 +261,6 @@ void setRefIDIE() {
 // returns stratum ; SNTP_spect.txt has format / byte / bit details
 unsigned int decSNTPStratumRefID(const unsigned char *p, char ri[REFIDSZ]) {
 	const unsigned int stratum = (unsigned int)p[1];
-	bzero(ri, REFIDSZ);
 	for (int i=0; i < REFIDSZ - 1; i++) ri[i] = p[i+SNTPREFIDSTART];
 	return stratum;
 }
@@ -271,45 +270,30 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
 
     const unsigned long b = bs.tv_sec * M_BILLION + bs.tv_nsec;
     const unsigned long e = es.tv_sec * M_BILLION + es.tv_nsec;  
+
+	static FILE   *outf = NULL;
+	if (isd && outf == NULL) {
+		outf = fopen(KWSNTPDEXTGET, "w"); 
+		if (outf == NULL) { perror("output file (fifo) open fail"); return false; }
+	}
+	calllog(false, b, false, outf);
+
     unsigned long bsl, esl;
     
     decSNTPPTime(pack, &bsl, &esl);
 	const bool ck = sanityCheck(b, bsl, esl, e);
 
-	char refid[REFIDSZ];
+	static char refid[REFIDSZ];
+	bzero(refid, REFIDSZ);
 	const int stratum = decSNTPStratumRefID(pack, refid);
 
-	char ob10[obuffullsz];
-	myout20f(b, bsl, esl, e, ip, stratum, refid, isd, ob10);
+	static char ob10[obuffullsz];
+	myout20f(ob10, b, bsl, esl, e, ip, stratum, refid, isd, ck);
 
-	printf("%s", ob10);
 
-    const char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\nStratum: %d\nRefID: %s\n";
-
-	FILE   *outf = NULL;
-	if (isd) {
-		outf = fopen(KWSNTPDEXTGET, "w"); if (outf == NULL) { perror("output file (fifo) open fail"); return false; }
+	if (outf != NULL) 
 		fprintf(outf, "%s", ob10);
-	}
-
-	calllog(false, b, false, outf);
-
-	if (ck) {
-			const char *pss = "**OK** - C - passes sanity check\n";
-			printf("%s", pss);
-			if (outf != NULL) fprintf(outf, "%s", pss);
-	}
-	else   {
-		const char *fss = "fails C sanity check\n";
-		 printf("%s", fss);
-		 if (outf != NULL) fprintf(outf, "%s", fss);
-	}
-
-	// the filler is needed due to fixed / minimum output length being easier to deal with
-	const char *filler = "************************************************************************\n";
-	printf("%s", filler);
-	if (outf != NULL) fprintf(outf, "%s", filler);
-
+		printf (	  "%s", ob10); // unconditional
 
 	if (outf != NULL) {
 		fflush(outf);

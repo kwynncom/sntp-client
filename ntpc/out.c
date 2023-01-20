@@ -7,18 +7,33 @@
 #include "all.h"
 
 
-void myout20f(	const unsigned long a1, 
-				const unsigned long a2, 
-				const unsigned long a3, 
-				const unsigned long a4,
-				const char *ip,
-				int stratum,
-				const char *refid,
-				const bool isd,
-				char *outb
+void myout20f(	
+	
+	char *outb,
+	const unsigned long a1, 
+	const unsigned long a2, 
+	const unsigned long a3, 
+	const unsigned long a4,
+	const char *ip,
+	const int stratum,
+	const char *refid,
+	const bool isd,
+	const bool psck
+
 ) {
-    const char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\nStratum: %d\nRefID: %s\nVERSION: %s\n";
-    sprintf (outb, fmt, a1, a2, a3, a4, ip, stratum, refid, KWSNTPV );
+
+	// I use the filler b/c fixed / minimum output length is easier to deal with
+	const char *filler = "************************************************************************";
+
+
+
+	char *sd;
+	if (psck) sd =  "**OK** - C - passes sanity check";
+	else	  sd = "fails C sanity check";
+
+
+    const char *fmt = "%lu\n%lu\n%lu\n%lu\n%s\nStratum: %d\nRefID: %s\nVERSION: %s\n%s\n%s\n";
+    sprintf (outb, fmt, a1, a2, a3, a4, ip, stratum, refid, KWSNTPV, sd, filler );
 }
 
 void hutime(const unsigned long Uus, char *obuf) {
