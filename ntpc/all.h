@@ -1,4 +1,4 @@
-#define KWSNTPV "2023/01/20 19:13 - back to open and close poke"
+#define KWSNTPV "2023/01/20 19:41 - open and close FIFO"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lockC" // must match PHP
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"

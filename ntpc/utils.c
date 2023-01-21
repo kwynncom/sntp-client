@@ -268,12 +268,9 @@ unsigned int decSNTPStratumRefID(const unsigned char *p, char ri[REFIDSZ]) {
 	return stratum;
 }
 
-FILE *kwsnfifoptrGlob = NULL;
 FILE *kwsnLogFPGlob	  = NULL;
 
 void closeOutputFiles() {
-	// myoutf(NULL, NULL, NULL, NULL, NULL, false, true);
-	if (kwsnfifoptrGlob != NULL) fclose(kwsnfifoptrGlob);
 	if (kwsnLogFPGlob   != NULL) fclose(kwsnLogFPGlob);
 }
 
@@ -303,10 +300,7 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
 		if (kwsnLogFPGlob == NULL) { perror("output full log file open fail"); return false; }
 	}
 
-	if (isd && kwsnfifoptrGlob == NULL) {
-		kwsnfifoptrGlob = fopen(KWSNTPDEXTGET, "w"); 
-		if (kwsnfifoptrGlob == NULL) { perror("output file (fifo) open fail"); return false; }
-	}
+
 
 	const char *begs = "*** BEGIN ***\n";
 
@@ -324,10 +318,12 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
 	if (outf) fflush(outf);
 			  fflush(stdout); // unc
 
-	if (kwsnfifoptrGlob != NULL) {
-		// putc('a', kwsnfifoptrGlob);
-		fputc ('a', kwsnfifoptrGlob);
-		fflush(kwsnfifoptrGlob);
+	if (isd) {
+		FILE *ffp = fopen(KWSNTPDEXTGET, "w"); 
+		if (ffp == NULL) { perror("output file (fifo) open fail"); return false; }
+		fputc ('a', ffp);
+		fflush(ffp);
+		fclose(ffp);
 	}
 
 	return true;
