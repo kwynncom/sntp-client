@@ -1,3 +1,5 @@
+/* https://tf.nist.gov/tf-cgi/servers.cgi */
+
 // stratum is bits 8 - 15, or the 2nd byte
 // The first 4 bits are the stratum proper; below indicates the number represented by the 4 bits, not bit indexes
 // bits numbered in big-endian fashion from 0 starting at the left or most significant end

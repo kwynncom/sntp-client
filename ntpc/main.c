@@ -1,24 +1,23 @@
 #include <stdio.h> // FILE
 #include <stdbool.h>
-#include <stdlib.h> // rand
+#include <stdlib.h> // exit()
 #include <time.h>   // timespec struct
 #include "all.h"
 
-void call10(const struct sockInfo *socks, const bool isd, const bool qckb, const int randOne);
+void call10(const struct sockInfo *socks, const bool isd, const bool qckb);
 
 void main(int argc, char *argv[]) {
 
     FILE   *lockf = getLockedFile();
 	if (lockf == NULL) { fprintf(stderr, "could not open and lock lockfile\n"); exit(150); /* safe to exit because nothing has been done */ }
-    srand(time(NULL));
 	struct sockInfo socks[IPN];
 	bool isd, dosleep, qck;
 	char ip[MAXIPL];
-	int randOne;
+	bool sockr;
 		
 	procArgs(argc, argv, &isd, &dosleep, &qck, &ip);
-    randOne = popSocks(socks, ip, isd);
-	if (randOne >= 0) call10(socks, isd, qck, randOne);
+    sockr = popSocks(socks, ip, isd);
+	if (sockr) call10(socks, isd, qck);
 	cleanup(socks, lockf);
-	if (!isd && dosleep && randOne >= 0) mysleep();
+	if (!isd && dosleep && sockr) mysleep();
 }

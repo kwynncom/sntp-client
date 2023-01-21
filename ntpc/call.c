@@ -3,7 +3,7 @@
 #include <time.h>   // timespec struct
 #include <stdbool.h>
 #include <string.h> // memcpy
-#include <stdlib.h> // rand
+// #include <stdlib.h> // rand
 #include <errno.h> // bad file descriptor and other error codes
 
 #include "all.h"
@@ -14,29 +14,31 @@ void kwSetPackIE(char *pack, const char *msg) {
 	strncpy(pack + SNTPREFIDSTART, msg, REFIDSZ - 1); 
 }
 
-void call10(const struct sockInfo *socks, const bool isd, const bool qckb, const int randOne) {
+void call10(const struct sockInfo *socks, const bool isd, const bool qckb) {
 
     unsigned char pack[SNPL], packCache[SNPL];
     struct timespec bsts;
     struct timespec ests;
-    int randi = randOne, randiCache = 0;
+    int ipidx = 0, ipidxCache = 0;
 	bool callret = true;
+	unsigned long calli = 0;
     
      do {
         setOBPack(pack);
 
-		if (isd && randOne >= IPN) randi = rand() % IPN;
+		if (isd) ipidx = calli % IPN;
 
         if (isd && !onin()) return;
-        if ((!(socks[randi].alwaysQuota || qckb)) || qckf()) {
- 			randiCache = randi;
-            callret = callServer(socks[randiCache].sock, &bsts, &ests, pack);
+        if ((!(socks[ipidx].alwaysQuota || qckb)) || qckf()) {
+ 			ipidxCache = ipidx;
+            callret = callServer(socks[ipidxCache].sock, &bsts, &ests, pack);
+			calli++;
         } else {
 			setOBPack(pack);
 			kwSetPackIE(pack, "KWQU");
 		}
 
-        if (!myoutf(       bsts,  ests, pack, socks[randiCache].iphu, isd)) return;
+        if (!myoutf(       bsts,  ests, pack, socks[ipidxCache].iphu, isd)) return;
  		 
     } while (isd && callret);
 }

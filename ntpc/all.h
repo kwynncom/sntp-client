@@ -1,4 +1,4 @@
-#define KWSNTPV "2023/01/20 19:41 - open and close FIFO"
+#define KWSNTPV "2023/01/21 02:33 - round robin IP, not rand (v2)"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lockC" // must match PHP
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
@@ -7,7 +7,7 @@
 #define ALLRESULTSFILE  "/var/kwynn/mysd/fullLog.txt"
 
 #define NISTMaxS 4.0
-#define IPN 7 // 7 NIST server IPs by default
+#define IPN 2 // 7 NIST server IPs by default ; 5 are IPv4; 2 are IPv6, so the next default
 
 #define M_BILLION 1000000000
 #define M_MILLION 1000000
@@ -23,8 +23,6 @@
 
 #define TOLERANCENS M_BILLION
 #define KWSNTPMINOUTLEN 2
-
-#define KWSNTP_RETURN_FAIL -87;
 
 #include <stdbool.h>
 
@@ -42,7 +40,7 @@ struct sockInfo {
 	bool alwaysQuota;
 };
 
-int popSocks(struct sockInfo *socks, const char *ip, const bool isd);
+bool popSocks(struct sockInfo *socks, const char *ip, const bool isd);
 void procArgs(int argc, char *argv[], bool *isd, bool *dosleep, bool *qck, char (*ip)[MAXIPL]);
 FILE *getLockedFile();
 void cleanup(const struct sockInfo *socks, const FILE *lockf);

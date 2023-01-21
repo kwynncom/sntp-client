@@ -1,4 +1,4 @@
-#include <stdlib.h> // rand(), abs(), etc.
+#include <stdlib.h> // abs(), r-and() (intentional -)
 #include <stdio.h> // perror
 #include <sys/socket.h> 
 #include <arpa/inet.h> 
@@ -32,28 +32,29 @@ void cleanup(const struct sockInfo *socks, const FILE *lockf) {
 
 int popIPs(struct sockInfo *socks, const char *ipin, const bool isd);
 
-int popSocks(struct sockInfo *socks, const char *ipin, const bool isd) {
+bool popSocks(struct sockInfo *socks, const char *ipin, const bool isd) {
     
 	int ipnl = popIPs(socks, ipin, isd);
-	if (ipnl < 1) return KWSNTP_RETURN_FAIL;
+	if (ipnl < 1) return false;
     int i = 0;
 
     for (i=0; i < ipnl; i++) {
-		if (!setAddr(socks[i].iphu, socks[i].ip46)) return KWSNTP_RETURN_FAIL;
+		if (!setAddr(socks[i].iphu, socks[i].ip46)) return false;
 		socks[i].sock = getOutboundUDPSock(socks[i].ip46, 123);
-		if (socks[i].sock < 0) return KWSNTP_RETURN_FAIL; 
+		if (socks[i].sock < 0) return false;
 	}
    
-	if (isd && ipnl == IPN) return IPN;
-	else return 0;
+	return true;
 }
 
 int popIPs(struct sockInfo *socks, const char *ipin, const bool isd) {
 
+		/* 	const char *nista[IPN] = {         "129.6.15.26",         "129.6.15.27", "129.6.15.28", "129.6.15.29", "129.6.15.30", 
+							   "2610:20:6f15:15::26", "2610:20:6f15:15::27" };  */
+
+	const char *nista[IPN] = { "2610:20:6f15:15::26", "2610:20:6f15:15::27" };
+
 	int i;
-							
-	const char *nista[IPN] = {         "129.6.15.26",         "129.6.15.27", "129.6.15.28", "129.6.15.29", "129.6.15.30", 
-							   "2610:20:6f15:15::26", "2610:20:6f15:15::27" }; /* https://tf.nist.gov/tf-cgi/servers.cgi */
 
 	const int l = strlen(ipin);
 	if (l >= MINIPL) {
@@ -68,11 +69,12 @@ int popIPs(struct sockInfo *socks, const char *ipin, const bool isd) {
 	}
 	
 	for (i=0; i < IPN; i++) {
-		strncpy(socks[i].iphu, nista[isd ? i : rand() % IPN], MAXIPL);
+		strncpy(socks[i].iphu, nista[i], MAXIPL);
 		socks[i].alwaysQuota = true;		
 		if (!isd) return 1;
 	}
 
+	if (IPN == 2) return IPN; // this odd logic is a sanity check
 	if (IPN == 7) return IPN;
 
 	fprintf(stderr, "ERROR: expecting a specific IPN const / #define value");
