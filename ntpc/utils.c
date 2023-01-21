@@ -278,7 +278,7 @@ void closeOutputFiles() {
 }
 
 bool myoutf(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
-			const bool isd, const bool newCall) {
+			const bool isd) {
 
     const unsigned long b = bs.tv_sec * M_BILLION + bs.tv_nsec;
     const unsigned long e = es.tv_sec * M_BILLION + es.tv_nsec;  
@@ -326,7 +326,7 @@ bool myoutf(const struct timespec bs, const struct timespec es, const char *pack
 
 	if (kwsnfifoptrGlob != NULL) {
 		// putc('a', kwsnfifoptrGlob);
-		fprintf(kwsnfifoptrGlob, "a\n");
+		fputc ('a', kwsnfifoptrGlob);
 		fflush(kwsnfifoptrGlob);
 	}
 

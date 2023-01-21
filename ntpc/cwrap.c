@@ -4,7 +4,7 @@
 #include <stdlib.h> // struct timespec
 #include <fcntl.h> // open
 #include "all.h"
-#define crwversion "2023/01/20 02:57 - one char"
+#define crwversion "2023/01/20 19:18 - output new var; with newline"
 
 
 bool shouldCloseF(const int argc, const char *argv[]) {
@@ -17,11 +17,12 @@ bool shouldCloseF(const int argc, const char *argv[]) {
 }
 
 void mywrite(const bool sc) {
-	char *b = "a";
-	if (sc) b = "x";
-	const int sz = strlen(b);
+	char b = 'w';
+	if (sc) b = 'x';
+	// const int sz = strlen(b);
 	const int wd = open(KWSNTPDPOKE, O_WRONLY | O_NONBLOCK);
-	write(wd, b, sz);
+	write(wd, &b, 1);
+	fsync(wd); 
 	close(wd);	
 }
 
@@ -29,24 +30,25 @@ void myread() {
 	int rd;
 	const int sz = KWSNTPMINOUTLEN;
 	char    b  [sz + 1];
+	char b20;
 	char    igb[sz + 1]; // ignore buffer - no need to zero it
 	bzero(b,  sz + 1);
 	
-	const int stepsn = 14;  
-	const int steps   [14]  = {  2, 3, 2, 2, 3, 40, 20, 40, 50, 50, 100, 100, 100, 100};
+	const int stepsn = 17;  
+	const int steps   [17]  = {  2, 3, 2, 2, 3, 40, 20, 40, 50, 50, 100, 100, 100, 100, 100, 200, 300};
 
 	rd = open(KWSNTPDEXTGET, O_RDONLY | O_NONBLOCK);
 	int i=0;
 
 	for (i=0; i < stepsn; i++) {
+		if (read(rd, &b20, 1) >= 1) break;
 		usleep(steps[i] * 1000);
-		if (read(rd, b, sz) >= sz) break;
 	}
 
-	read(rd, igb, sz); // might need to clear any unused output
+	// read(rd, igb, sz); // might need to clear any unused output
 
 	close(rd);
-	printf("%s", b);
+	printf("%c\n", b20);
 	printf("%s %s\n", "C FIFO runner / wrapper VERSION: ", crwversion);
 	// printf("******************\n");
 }

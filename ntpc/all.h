@@ -1,4 +1,4 @@
-#define KWSNTPV "2023/01/20 01:48 - abstracted output"
+#define KWSNTPV "2023/01/20 19:13 - back to open and close poke"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lockC" // must match PHP
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
@@ -50,8 +50,7 @@ void mysleep();
 
 bool sanityCheck(const unsigned long a, const unsigned long b, const unsigned long c, const unsigned long d);
 
-bool myoutf(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, 
-			const bool isd, const bool didSend);
+bool myoutf(const struct timespec bs, const struct timespec es, const char *pack, const char *ip, const bool isd);
 
 bool qckf();
 bool onin(void);
