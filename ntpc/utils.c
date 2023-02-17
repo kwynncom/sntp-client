@@ -14,6 +14,10 @@
 #include "all.h"
 #include "out.h"
 
+// const char *nista[IPN] = { "2610:20:6f15:15::26", "2610:20:6f15:15::27" };
+
+const char *nista[IPN] = { "129.6.15.26", "129.6.15.27", "129.6.15.28", "129.6.15.29", "129.6.15.30", "2610:20:6f15:15::26", "2610:20:6f15:15::27" }; 
+
 void mysleep() {
 	int sl = (int)round(NISTMaxS);
 	printf("Sleeping for %d seconds, from C.  Zzzzz....\n", sl);
@@ -48,11 +52,6 @@ bool popSocks(struct sockInfo *socks, const char *ipin, const bool isd) {
 }
 
 int popIPs(struct sockInfo *socks, const char *ipin, const bool isd) {
-
-		/* 	const char *nista[IPN] = {         "129.6.15.26",         "129.6.15.27", "129.6.15.28", "129.6.15.29", "129.6.15.30", 
-							   "2610:20:6f15:15::26", "2610:20:6f15:15::27" };  */
-
-	const char *nista[IPN] = { "2610:20:6f15:15::26", "2610:20:6f15:15::27" };
 
 	int i;
 

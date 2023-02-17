@@ -1,4 +1,4 @@
-#define KWSNTPV "2023/01/21 02:33 - round robin IP, not rand (v2)"
+#define KWSNTPV "2023/02/17 17:45 - back to 7 NIST servers"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lockC" // must match PHP
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
@@ -7,7 +7,8 @@
 #define ALLRESULTSFILE  "/var/kwynn/mysd/fullLog.txt"
 
 #define NISTMaxS 4.0
-#define IPN 2 // 7 NIST server IPs by default ; 5 are IPv4; 2 are IPv6, so the next default
+
+#define IPN 7 // 7 NIST server IPs by default ; 5 are IPv4; 2 are IPv6, so the next default
 
 #define M_BILLION 1000000000
 #define M_MILLION 1000000
