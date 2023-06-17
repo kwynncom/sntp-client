@@ -16,7 +16,28 @@
 
 // const char *nista[IPN] = { "2610:20:6f15:15::26", "2610:20:6f15:15::27" };
 
-const char *nista[IPN] = { "129.6.15.26", "129.6.15.27", "129.6.15.28", "129.6.15.29", "129.6.15.30", "2610:20:6f15:15::26", "2610:20:6f15:15::27" }; 
+// Maryland
+// const char *nista[IPN] = { "129.6.15.26", "129.6.15.27", "129.6.15.28", "129.6.15.29", "129.6.15.30", "2610:20:6f15:15::26", "2610:20:6f15:15::27" }; 
+
+// Maryland + 4x Colorado IPv6
+/*
+const char *nista[IPN] = { 
+	"2610:20:6f97:97::4", // CO
+"129.6.15.26", 
+	"2610:20:6f97:97::6", // CO
+"129.6.15.27", 
+	"2610:20:6f96:96::4", // CO
+"129.6.15.28", "129.6.15.29", "129.6.15.30", "2610:20:6f15:15::26", "2610:20:6f15:15::27",
+	"2610:20:6f96:96::6" // CO
+}; */
+
+const char *nista[IPN] = { 
+	"2610:20:6f97:97::4",
+	"2610:20:6f97:97::6",
+	"2610:20:6f96:96::4",
+	"2610:20:6f96:96::6"
+};
+ 
 
 void mysleep() {
 	int sl = (int)round(NISTMaxS);
@@ -73,8 +94,10 @@ int popIPs(struct sockInfo *socks, const char *ipin, const bool isd) {
 		if (!isd) return 1;
 	}
 
-	if (IPN == 2) return IPN; // this odd logic is a sanity check
-	if (IPN == 7) return IPN;
+	if (IPN ==  2) return IPN; // this odd logic is a sanity check
+	if (IPN ==  7) return IPN; // same
+	if (IPN == 11) return IPN; // same
+	if (IPN ==  4) return IPN;
 
 	fprintf(stderr, "ERROR: expecting a specific IPN const / #define value");
 	return 0;

@@ -1,4 +1,4 @@
-#define KWSNTPV "2023/02/17 17:45 - back to 7 NIST servers"
+#define KWSNTPV "2023/06/16 20:42 - 4 CO IPv6"
 
 #define KWSNTPDLOCKFILE "/var/kwynn/mysd/lockC" // must match PHP
 #define KWSNTPDEXTGET   "/var/kwynn/mysd/get"
@@ -8,7 +8,11 @@
 
 #define NISTMaxS 4.0
 
-#define IPN 7 // 7 NIST server IPs by default ; 5 are IPv4; 2 are IPv6, so the next default
+// 11 are the Maryland 7 + 4x IPv6 Colorado
+// #define IPN 11 // 7 NIST server IPs by default ; 5 are IPv4; 2 are IPv6, so the next default
+
+#define IPN 4 // 4 === IPv6 Colorado
+
 
 #define M_BILLION 1000000000
 #define M_MILLION 1000000
